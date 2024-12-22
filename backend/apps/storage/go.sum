@@ -1,0 +1,4 @@
+github.com/ava-orange-education/Ultimate-Certified-Kubernetes-Application-Developer-CKAD-Certification-Guide/backend/apps/books v0.0.0-20241222141928-98a58ca0db22 h1:OraXuoq/SGPJGEGwVC9oU7hUoV2vBacyG0RqCYTiO8o=
+github.com/ava-orange-education/Ultimate-Certified-Kubernetes-Application-Developer-CKAD-Certification-Guide/backend/apps/books v0.0.0-20241222141928-98a58ca0db22/go.mod h1:6MeUo+xtexKpW8RjJ24GTfRh94qG5iNjy7W1/YpNM4M=
+github.com/gorilla/mux v1.8.1 h1:TuBL49tXwgrFYWhqrNgrUNEY92u81SPhu7sTdzQEiWY=
+github.com/gorilla/mux v1.8.1/go.mod h1:AKf9I4AEqPTmMytcMc0KkNouC66V3BtZ4qD5fmWSiMQ=
