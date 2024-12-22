@@ -1,6 +1,6 @@
 # Ultimate Certified Kubernetes Application Developer (CKAD) Certification Guide
 
-This repository contains the resources, source code, and deployment configurations for a practical e-commerce bookstore project that complements the **Certified Kubernetes Application Developer (CKAD)** certification guide.
+This repository contains the resources, source code, and deployment configurations for a practical e-commerce bookstore (**AvaKart**) project that complements the **Certified Kubernetes Application Developer (CKAD)** certification guide.
 
 ## Overview
 
