@@ -42,7 +42,7 @@ The books service is a core microservice of the AvaKart e-commerce platform, res
 
 Build the service using the provided Dockerfile:
 ```bash
-docker build -f ../../builds/dockerfiles/Dockerfile.backend -t avakart-books .
+docker build -f ../../builds/dockerfiles/Dockerfile.books -t books.svc.avakart .
 ```
 
 ### Kubernetes Deployment
