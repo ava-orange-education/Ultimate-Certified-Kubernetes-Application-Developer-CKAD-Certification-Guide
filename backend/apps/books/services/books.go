@@ -3,12 +3,13 @@ package services
 import (
 	"github.com/ava-orange-education/Ultimate-Certified-Kubernetes-Application-Developer-CKAD-Certification-Guide/backend/apps/books/handlers"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 )
 
 const (
-	StorageServiceURL  = "http://storage-service:8083"
-	OrderProcessingURL = "http://order-processing:8082"
+	StorageServiceURL  = "http://localhost:8083"
+	OrderProcessingURL = "http://localhost:8082"
 )
 
 type BooksService struct {
@@ -21,13 +22,18 @@ func NewBooksService() *BooksService {
 	}
 }
 
-func (bs *BooksService) AddRoutes() *mux.Router {
-	router := mux.NewRouter()
+func (bs *BooksService) AddRoutes() *chi.Mux {
+	router := chi.NewRouter()
 
-	router.HandleFunc("/api/books/list", bs.bh.ListBooks).Methods("GET")
-	router.HandleFunc("/api/books/add", bs.bh.AddBook).Methods("POST")
-	router.HandleFunc("/api/books/details", bs.bh.GetBookDetails).Methods("GET")
-	router.HandleFunc("/api/purchase", bs.bh.InitiatePurchase).Methods("POST")
+	router.Use(middleware.Logger)
+	router.Use(middleware.Recoverer)
+
+	router.Route("/api/books", func(r chi.Router) {
+		r.Get("/list", bs.bh.ListBooks)
+		r.Post("/add", bs.bh.AddBook)
+		r.Get("/details", bs.bh.GetBookDetails)
+		r.Post("/purchase", bs.bh.InitiatePurchase)
+	})
 
 	return router
 }

@@ -2,4 +2,4 @@ module github.com/ava-orange-education/Ultimate-Certified-Kubernetes-Application
 
 go 1.23.3
 
-require github.com/gorilla/mux v1.8.1
+require github.com/go-chi/chi/v5 v5.2.0
