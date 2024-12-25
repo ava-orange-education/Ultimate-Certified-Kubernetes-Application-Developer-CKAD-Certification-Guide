@@ -6,6 +6,14 @@ type Error struct {
 	Message    string
 }
 
+func NewError(status int, code, message string) error {
+	return &Error{
+		HTTPStatus: status,
+		ErrCode:    code,
+		Message:    message,
+	}
+}
+
 func (e Error) Error() string {
 	var str string
 
@@ -20,16 +28,8 @@ func (e Error) Error() string {
 	return str
 }
 
-func NewError(status int, code, message string) error {
-	return &Error{
-		HTTPStatus: status,
-		ErrCode:    code,
-		Message:    message,
-	}
-}
-
-func (e Error) ToAPIResponse() ErrorResponse {
-	return ErrorResponse{
+func (e Error) ToAPIResponse() ErrorResponseBody {
+	return ErrorResponseBody{
 		Code:    e.ErrCode,
 		Message: e.Message,
 	}

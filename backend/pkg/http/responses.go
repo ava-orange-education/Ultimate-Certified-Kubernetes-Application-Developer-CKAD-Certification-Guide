@@ -8,21 +8,21 @@ import (
 	"net/http"
 )
 
-type ErrorResponse struct {
+type ErrorResponseBody struct {
 	Code    string `json:"code"`
 	Message string `json:"message"`
 }
 
-func Error(ctx context.Context, w http.ResponseWriter, err error) {
+func ErrorResponse(ctx context.Context, w http.ResponseWriter, err error) {
 	var httpStatus int
-	var apiResp *ErrorResponse
+	var apiResp *ErrorResponseBody
 
 	var apiErr *Error
 	if errors.As(err, &apiErr) {
 		httpStatus = apiErr.HTTPStatus
 	} else {
 		httpStatus = http.StatusInternalServerError
-		apiResp = &ErrorResponse{
+		apiResp = &ErrorResponseBody{
 			Message: err.Error(),
 		}
 	}
@@ -31,7 +31,7 @@ func Error(ctx context.Context, w http.ResponseWriter, err error) {
 }
 
 func ErrorWithStatus(ctx context.Context, w http.ResponseWriter, status int, errMsg string) {
-	apiResp := &ErrorResponse{
+	apiResp := &ErrorResponseBody{
 		Message: errMsg,
 	}
 
