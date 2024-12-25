@@ -4,7 +4,8 @@ import (
 	"github.com/ava-orange-education/Ultimate-Certified-Kubernetes-Application-Developer-CKAD-Certification-Guide/backend/apps/storage/handlers"
 	"github.com/ava-orange-education/Ultimate-Certified-Kubernetes-Application-Developer-CKAD-Certification-Guide/backend/apps/storage/repository"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 )
 
 type StorageService struct {
@@ -17,14 +18,22 @@ func NewStorageService(br *repository.BooksRepo) *StorageService {
 	}
 }
 
-func (ss *StorageService) AddRoutes() *mux.Router {
-	router := mux.NewRouter()
+func (ss *StorageService) AddRoutes() *chi.Mux {
+	router := chi.NewRouter()
 
-	router.HandleFunc("/books/add", ss.sh.AddBook).Methods("POST")
-	router.HandleFunc("/books/get", ss.sh.GetBook).Methods("GET")
-	router.HandleFunc("/books/update", ss.sh.UpdateBook).Methods("PUT")
-	router.HandleFunc("/internal/books/quantity", ss.sh.CheckQuantity).Methods("GET")
-	router.HandleFunc("/internal/books/update-quantity", ss.sh.UpdateQuantity).Methods("PUT")
+	router.Use(middleware.Logger)
+	router.Use(middleware.Recoverer)
+
+	router.Route("/books", func(r chi.Router) {
+		r.Get("/get", ss.sh.GetBook)
+		r.Post("/add", ss.sh.AddBook)
+		r.Put("/update", ss.sh.UpdateBook)
+	})
+
+	router.Route("/internal/books", func(r chi.Router) {
+		r.Get("/quantity", ss.sh.CheckQuantity)
+		r.Put("/update-quantity", ss.sh.UpdateQuantity)
+	})
 
 	return router
 }
