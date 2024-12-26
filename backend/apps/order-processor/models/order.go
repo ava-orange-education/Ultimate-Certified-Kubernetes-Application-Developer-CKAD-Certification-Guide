@@ -10,8 +10,9 @@ type Order struct {
 }
 
 type CreateOrderRequest struct {
-	BookID string `json:"book_id"`
-	UserID string `json:"user_id"`
+	BookID   string `json:"book_id"`
+	UserID   string `json:"user_id"`
+	Quantity int    `json:"quantity"`
 }
 
 type UpdateOrderStatusRequest struct {

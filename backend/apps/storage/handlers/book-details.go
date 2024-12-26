@@ -5,14 +5,10 @@ import (
 	"net/http"
 
 	booksmodels "github.com/ava-orange-education/Ultimate-Certified-Kubernetes-Application-Developer-CKAD-Certification-Guide/backend/apps/books/models"
+	httpPkg "github.com/ava-orange-education/Ultimate-Certified-Kubernetes-Application-Developer-CKAD-Certification-Guide/backend/pkg/http"
 )
 
 func (s *StorageHandler) AddBook(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	var book booksmodels.Book
 	if err := json.NewDecoder(r.Body).Decode(&book); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
@@ -21,16 +17,10 @@ func (s *StorageHandler) AddBook(w http.ResponseWriter, r *http.Request) {
 
 	s.br.AddBook(book)
 
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(book)
+	httpPkg.JSON(r.Context(), w, http.StatusCreated, book)
 }
 
 func (s *StorageHandler) GetBook(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	bookID := r.URL.Query().Get("id")
 	if bookID == "" {
 		http.Error(w, "Book ID required", http.StatusBadRequest)
@@ -43,15 +33,14 @@ func (s *StorageHandler) GetBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(book)
+	httpPkg.JSON(r.Context(), w, http.StatusOK, book)
+}
+
+func (s *StorageHandler) ListBooks(w http.ResponseWriter, r *http.Request) {
+	httpPkg.JSON(r.Context(), w, http.StatusOK, s.br.GetBooks())
 }
 
 func (s *StorageHandler) UpdateBook(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPut {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	var book booksmodels.Book
 	if err := json.NewDecoder(r.Body).Decode(&book); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
@@ -63,5 +52,5 @@ func (s *StorageHandler) UpdateBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(book)
+	httpPkg.JSON(r.Context(), w, http.StatusCreated, book)
 }

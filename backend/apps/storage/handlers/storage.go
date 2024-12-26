@@ -6,8 +6,11 @@ import (
 
 type StorageHandler struct {
 	br *storageRepo.BooksRepo
+	or *storageRepo.OrderRepository
 }
 
-func NewStorageHandler(br *storageRepo.BooksRepo) *StorageHandler {
-	return &StorageHandler{br: br}
+func NewStorageHandler(
+	br *storageRepo.BooksRepo,
+	or *storageRepo.OrderRepository) *StorageHandler {
+	return &StorageHandler{br: br, or: or}
 }
