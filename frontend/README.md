@@ -1,47 +1,62 @@
-# AvaKart Frontend
+# Frontend Service
 
-React-based frontend for the AvaKart bookstore application.
-
-## Features
-
-- Browse available books
-- View book details and inventory status
-- Purchase books (currently limited to quantity of 1 per purchase)
-- Real-time inventory display
-
-## Planned Enhancements
-
-- Configurable purchase quantities
-- Order management and cancellation functionality
-- Enhanced inventory status visualization
+React-based frontend service for the bookstore application.
 
 ## Development
 
-This project uses:
-- React with Vite for fast development
-- ESLint for code quality
-- CSS Modules for styling
-
-### Getting Started
-
-1. Install dependencies:
 ```bash
 npm install
-```
-
-2. Start development server:
-```bash
 npm run dev
 ```
 
-3. Build for production:
+## Docker
+
+The service uses a multi-stage build process:
+
+1. Build stage:
+   - Base image: node:18-alpine
+   - Installs dependencies and builds the React application
+
+2. Production stage:
+   - Base image: nginx:alpine
+   - Serves the built static files using Nginx
+   - Exposes port 80
+
+### Building the Image
+
 ```bash
-npm run build
+docker build -t frontend:latest -f builds/dockerfiles/Dockerfile.frontend .
 ```
 
-### Project Structure
+## Kubernetes Deployment
 
-- `src/components/` - React components
-- `src/services/` - API integration and data handling
-- `src/styles/` - CSS modules and global styles
-- `src/assets/` - Static assets
+The service is deployed using Kubernetes:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 2
+  template:
+    spec:
+      containers:
+      - name: frontend
+        image: frontend:latest
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "200m"
+            memory: "256Mi"
+```
+
+### Key Features
+- Runs 2 replicas for high availability
+- Uses Nginx to serve static content
+- Includes health checks for reliability
+- Resource limits and requests defined

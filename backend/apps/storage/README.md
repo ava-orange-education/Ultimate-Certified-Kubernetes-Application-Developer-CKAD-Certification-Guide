@@ -1,99 +1,68 @@
 # Storage Service
 
-The storage service is responsible for managing persistent data storage for the book inventory system. It provides a centralized storage solution for book details and quantity management.
-
-## Features
-
-### Book Management
-- Complete book lifecycle handling:
-  - Book details storage and retrieval
-  - Book metadata management
-  - Book quantity tracking
-  - Inventory adjustments
-
-### Order Management
-- Order data persistence
-- Order status tracking
-- Order history maintenance
-- Integration with order processing service
-
-## API Endpoints
-
-All endpoints are internal, accessible only to other microservices.
-
-### Book Operations
-- `GET /internal/books/list` - List all books
-- `GET /internal/books/get` - Get book by ID
-- `POST /internal/books/add` - Add new book
-- `PUT /internal/books/update` - Update book details
-- `GET /internal/books/quantity` - Check book quantity
-- `PUT /internal/books/update-quantity` - Update book quantity
-
-### Order Operations
-- `GET /internal/orders/list` - List all orders
-- `GET /internal/orders/get` - Get order by ID
-- `POST /internal/orders/add` - Create new order
-- `PUT /internal/orders/update-status` - Update order status
+Go-based service for managing storage and inventory in the bookstore application.
 
 ## Development
 
-### Prerequisites
-- Go 1.23.3
-- Access to a MongoDB instance (configured via environment variables)
-
-### Running Locally
-1. Set required environment variables
-2. Run `go mod download` to install dependencies
-3. Execute `go run main.go` to start the service
-
-### Docker Build
-
-**Not yet implemeted**
-
-Build the service using the provided Dockerfile:
 ```bash
-docker build -f ../../builds/dockerfiles/Dockerfile.storage -t storage.svc.avakart .
+go mod download
+go run main.go
 ```
-### Kubernetes Deployment
 
-**Not yet implemeted**
+## Docker
 
-The service can be deployed using Kubernetes:
+The service uses a multi-stage build process:
+
+1. Build stage:
+   - Base image: golang:1.21-alpine
+   - Compiles the Go application with CGO disabled
+   - Produces a statically linked binary
+
+2. Production stage:
+   - Base image: alpine:3.18
+   - Runs as non-root user for security
+   - Exposes port 8080
+
+### Building the Image
+
 ```bash
-kubectl apply -f builds/deployments/k8s/storage/
+docker build -t storage-service:latest -f builds/dockerfiles/Dockerfile.storage .
 ```
 
-Configuration is managed through Kubernetes ConfigMaps and can be customized by modifying:
-- `builds/deployments/k8s/storage/configmap.yaml`
-- `builds/deployments/k8s/storage/deployment.yaml`
-- `builds/deployments/k8s/storage/service.yaml`
+## Kubernetes Deployment
 
-## Architecture
+The service is deployed using Kubernetes:
 
-The service follows a clean architecture pattern:
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: storage-service
+spec:
+  replicas: 2
+  template:
+    spec:
+      containers:
+      - name: storage-service
+        image: storage-service:latest
+        ports:
+        - containerPort: 8080
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          allowPrivilegeEscalation: false
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "200m"
+            memory: "256Mi"
 ```
-.
-├── handlers/
-│   ├── book-details.go    # Book data operations
-│   ├── book-quantity.go   # Inventory management
-│   ├── order.go          # Order operations
-│   └── storage.go        # Common handler logic
-├── models/
-│   └── request.go        # Data transfer objects
-├── repository/
-│   ├── books.go          # Book data persistence
-│   └── orders.go         # Order data persistence
-├── services/
-│   └── storage.go        # Core business logic
-└── main.go               # Service entry point
-```
 
-## Service Integration
-
-The service operates on port `:8083` and provides internal APIs for:
-- Books Service (`:8081`):
-  - Book catalog operations
-  - Inventory checks
-- Order Processing Service (`:8082`):
-  - Order management
-  - Status updates
+### Key Features
+- Runs 2 replicas for high availability
+- Secure configuration with non-root user
+- Health checks at /health endpoint
+- Resource limits and requests defined
+- Container security context configured

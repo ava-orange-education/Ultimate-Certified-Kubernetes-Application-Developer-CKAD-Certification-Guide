@@ -1,121 +1,68 @@
-# AvaKart Books Service
+# Books Service
 
-The books service is a core microservice of the AvaKart e-commerce platform, responsible for managing the book catalog and related operations. Written in Go, it provides RESTful APIs for book management and integrates with other platform services.
+Go-based backend service for managing books in the bookstore application.
 
-## Features
-
-- Book catalog management (CRUD operations)
-- Book metadata handling through structured models
-- Book purchase initiation and availability checks
-- RESTful API endpoints for:
-  - Book listings and search
-  - Book details retrieval
-  - Book inventory management
-  - Purchase processing
-- Integration with:
-  - Storage service for persistence and inventory
-  - Order processor service for purchase handling
-
-## Configuration
-
-The service can be configured using environment variables:
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| PORT | The port number the service listens on | 8081 |
-| STORAGE_SERVICE_URL | URL of the storage service | http://localhost:8083 |
-| ORDER_PROCESSOR_URL | URL of the order processor service | http://localhost:8082 |
-
-## Development Setup
-
-### Prerequisites
-
-- Go 1.23.3
-- Docker and Docker Compose (for local development)
-- Kubernetes cluster (for deployment)
-
-### Local Development
-
-1. Install dependencies:
-   ```bash
-   go mod download
-   ```
-
-2. Run the service:
-   ```bash
-   go run main.go
-   ```
-
-### Docker Build
-
-**Not yet implemeted**
-
-Build the service using the provided Dockerfile:
-```bash
-docker build -f ../../builds/dockerfiles/Dockerfile.books -t books.svc.avakart .
-```
-
-### Kubernetes Deployment
-
-**Not yet implemeted**
-
-The service can be deployed to Kubernetes using the manifests in `builds/deployments/k8s/backend/`:
+## Development
 
 ```bash
-kubectl apply -f builds/deployments/k8s/backend/
+go mod download
+go run main.go
 ```
 
-This will create:
-- Deployment with the books service
-- Service for network access
-- ConfigMap for configuration
+## Docker
 
-## Project Structure
+The service uses a multi-stage build process:
 
+1. Build stage:
+   - Base image: golang:1.21-alpine
+   - Compiles the Go application with CGO disabled
+   - Produces a statically linked binary
+
+2. Production stage:
+   - Base image: alpine:3.18
+   - Runs as non-root user for security
+   - Exposes port 8080
+
+### Building the Image
+
+```bash
+docker build -t books-service:latest -f builds/dockerfiles/Dockerfile.backend .
 ```
-.
-├── main.go          # Service entry point
-├── handlers/        # HTTP request handlers
-│   └── books.go     # Books-related endpoint handlers
-├── models/          # Data models
-│   └── book.go      # Book entity definition
-└── services/        # Business logic implementation
-    └── books.go     # Books service implementation
+
+## Kubernetes Deployment
+
+The service is deployed using Kubernetes:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: books-service
+spec:
+  replicas: 2
+  template:
+    spec:
+      containers:
+      - name: books-service
+        image: books-service:latest
+        ports:
+        - containerPort: 8080
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          allowPrivilegeEscalation: false
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "200m"
+            memory: "256Mi"
 ```
 
-## Integration Points
-
-- **Storage Service**: 
-  - Book data persistence
-  - Inventory management
-  - Internal quantity checks
-- **Order Processor**: 
-  - Purchase request handling
-  - Order creation and management
-- **Frontend**: 
-  - Book listing (BookList component)
-  - Book addition (AddBook component)
-
-## API Documentation
-
-The service provides the following REST endpoints under `/api/books`:
-
-### Book Management
-- `GET /list` - List all available books
-- `GET /details?id={bookId}` - Get detailed book information by ID
-- `POST /add` - Add a new book to the catalog
-  - Automatically generates UUID-based book ID
-  - Associates book with seller ID
-
-### Purchase Operations
-- `POST /purchase` - Initiate book purchase
-  - Associates purchase with buyer ID
-  - Validates book availability through storage service
-  - Creates order through order processing service
-  - Manages inventory updates
-
-Each endpoint integrates with appropriate backend services:
-- Storage Service (`:8083`) for data persistence and inventory
-- Order Processing Service (`:8082`) for order management
-
-Detailed request/response formats and examples are available in the API documentation.
+### Key Features
+- Runs 2 replicas for high availability
+- Secure configuration with non-root user
+- Health checks at /health endpoint
+- Resource limits and requests defined
+- Container security context configured

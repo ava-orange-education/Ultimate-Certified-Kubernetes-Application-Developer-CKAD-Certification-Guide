@@ -1,27 +1,31 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: storage-service
+  name: books-service
   labels:
-    app: storage-service
+    app: books-service
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: storage-service
+      app: books-service
   template:
     metadata:
       labels:
-        app: storage-service
+        app: books-service
     spec:
       containers:
-      - name: storage-service
-        image: storage-service:latest
+      - name: books-service
+        image: books-service:latest
         ports:
-        - containerPort: 8083
+        - containerPort: 8081
         env:
         - name: PORT
-          value: "8083"
+          value: "8081"
+        - name: STORAGE_SERVICE_URL
+          value: "http://storage-service:8083"
+        - name: ORDER_PROCESSOR_URL
+          value: "http://order-processor:8082"
         resources:
           requests:
             cpu: "100m"
@@ -32,13 +36,13 @@ spec:
         livenessProbe:
           httpGet:
             path: /health
-            port: 8083
+            port: 8081
           initialDelaySeconds: 5
           periodSeconds: 10
         readinessProbe:
           httpGet:
             path: /health
-            port: 8083
+            port: 8081
           initialDelaySeconds: 3
           periodSeconds: 5
         securityContext:
