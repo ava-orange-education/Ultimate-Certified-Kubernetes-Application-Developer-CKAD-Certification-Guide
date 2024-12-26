@@ -16,6 +16,16 @@ The books service is a core microservice of the AvaKart e-commerce platform, res
   - Storage service for persistence and inventory
   - Order processor service for purchase handling
 
+## Configuration
+
+The service can be configured using environment variables:
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| PORT | The port number the service listens on | 8081 |
+| STORAGE_SERVICE_URL | URL of the storage service | http://localhost:8083 |
+| ORDER_PROCESSOR_URL | URL of the order processor service | http://localhost:8082 |
+
 ## Development Setup
 
 ### Prerequisites

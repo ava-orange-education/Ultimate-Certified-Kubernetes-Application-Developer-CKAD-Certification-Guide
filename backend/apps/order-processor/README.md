@@ -23,6 +23,15 @@ The service follows a layered architecture:
 - Robust error handling and validation
 - Designed for high-volume order processing
 
+## Configuration
+
+The service can be configured using environment variables:
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| PORT | The port number the service listens on | 8082 |
+| STORAGE_SERVICE_URL | URL of the storage service | http://localhost:8083 |
+
 ## Development
 
 ### Prerequisites
