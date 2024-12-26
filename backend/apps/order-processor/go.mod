@@ -3,14 +3,14 @@ module github.com/ava-orange-education/Ultimate-Certified-Kubernetes-Application
 go 1.23.3
 
 require (
-	github.com/ava-orange-education/Ultimate-Certified-Kubernetes-Application-Developer-CKAD-Certification-Guide/backend/apps/books v0.0.0-20241225111830-026d7b5e3c41
-	github.com/ava-orange-education/Ultimate-Certified-Kubernetes-Application-Developer-CKAD-Certification-Guide/backend/pkg/http v0.0.0-20241225111830-026d7b5e3c41
+	github.com/alcionai/clues v0.0.0-20241221005556-ce9259ae3879
+	github.com/ava-orange-education/Ultimate-Certified-Kubernetes-Application-Developer-CKAD-Certification-Guide/backend/apps/books v0.0.0-20241226122716-882b4a641a7d
+	github.com/ava-orange-education/Ultimate-Certified-Kubernetes-Application-Developer-CKAD-Certification-Guide/backend/pkg/http v0.0.0-20241226122716-882b4a641a7d
 	github.com/go-chi/chi/v5 v5.2.0
 	github.com/google/uuid v1.6.0
 )
 
 require (
-	github.com/alcionai/clues v0.0.0-20241221005556-ce9259ae3879 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect

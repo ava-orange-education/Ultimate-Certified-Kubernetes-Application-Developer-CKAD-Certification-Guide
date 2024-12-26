@@ -1,8 +1,8 @@
-github.com/ava-orange-education/Ultimate-Certified-Kubernetes-Application-Developer-CKAD-Certification-Guide/backend/apps/books v0.0.0-20241222141928-98a58ca0db22 h1:OraXuoq/SGPJGEGwVC9oU7hUoV2vBacyG0RqCYTiO8o=
-github.com/ava-orange-education/Ultimate-Certified-Kubernetes-Application-Developer-CKAD-Certification-Guide/backend/apps/books v0.0.0-20241222141928-98a58ca0db22/go.mod h1:6MeUo+xtexKpW8RjJ24GTfRh94qG5iNjy7W1/YpNM4M=
-github.com/ava-orange-education/Ultimate-Certified-Kubernetes-Application-Developer-CKAD-Certification-Guide/backend/apps/order-processor v0.0.0-20241225111830-026d7b5e3c41 h1:GOGkxhYYpnz9s2Lz5Cxn+6OeLqVap7unASesjnh1btg=
-github.com/ava-orange-education/Ultimate-Certified-Kubernetes-Application-Developer-CKAD-Certification-Guide/backend/apps/order-processor v0.0.0-20241225111830-026d7b5e3c41/go.mod h1:BLwPcrQjCGHou6f7CL7q3ZNZtgmuSn8vXFQzKnx2HTs=
-github.com/ava-orange-education/Ultimate-Certified-Kubernetes-Application-Developer-CKAD-Certification-Guide/backend/pkg/http v0.0.0-20241225111830-026d7b5e3c41 h1:cTFisE5++xRZSnqNxtybdgFJFH+5KAVoZY+Bj6WMNjY=
-github.com/ava-orange-education/Ultimate-Certified-Kubernetes-Application-Developer-CKAD-Certification-Guide/backend/pkg/http v0.0.0-20241225111830-026d7b5e3c41/go.mod h1:ZBJ+sf2RFe0A/2KpbmP652h0WVEf1SStQ30TwQrFz6U=
+github.com/ava-orange-education/Ultimate-Certified-Kubernetes-Application-Developer-CKAD-Certification-Guide/backend/apps/books v0.0.0-20241226122716-882b4a641a7d h1:g3SA/q4zK2rqD+d+Qx7vTd9KqOa7jTWL+S7qIU+DUHc=
+github.com/ava-orange-education/Ultimate-Certified-Kubernetes-Application-Developer-CKAD-Certification-Guide/backend/apps/books v0.0.0-20241226122716-882b4a641a7d/go.mod h1:Y98lQWKdXD4JAWwj38EqbWjO7VXtR8Z2kaw2lbMSPzg=
+github.com/ava-orange-education/Ultimate-Certified-Kubernetes-Application-Developer-CKAD-Certification-Guide/backend/apps/order-processor v0.0.0-20241226122716-882b4a641a7d h1:oIXlSCalWjtcvkL3UdumXMYGOjCPImy1V+s3lMTi+I4=
+github.com/ava-orange-education/Ultimate-Certified-Kubernetes-Application-Developer-CKAD-Certification-Guide/backend/apps/order-processor v0.0.0-20241226122716-882b4a641a7d/go.mod h1:aIZ7gKzSwctg5cNNe47mflsRcXqJeMWdlGK7Swco1u8=
+github.com/ava-orange-education/Ultimate-Certified-Kubernetes-Application-Developer-CKAD-Certification-Guide/backend/pkg/http v0.0.0-20241226122716-882b4a641a7d h1:SMcIRTuhcnneppZzUcaTrrJbdpoPfBFXjJfv4+krqgs=
+github.com/ava-orange-education/Ultimate-Certified-Kubernetes-Application-Developer-CKAD-Certification-Guide/backend/pkg/http v0.0.0-20241226122716-882b4a641a7d/go.mod h1:ZBJ+sf2RFe0A/2KpbmP652h0WVEf1SStQ30TwQrFz6U=
 github.com/go-chi/chi/v5 v5.2.0 h1:Aj1EtB0qR2Rdo2dG4O94RIU35w2lvQSj6BRA4+qwFL0=
 github.com/go-chi/chi/v5 v5.2.0/go.mod h1:DslCQbL2OYiznFReuXYUmQ2hGd1aDpCnlMNITLSKoi8=
