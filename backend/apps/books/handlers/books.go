@@ -155,6 +155,11 @@ func (bh *BooksHandler) GetBookDetails(w http.ResponseWriter, r *http.Request) {
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != http.StatusOK {
+		http.Error(w, "Failed to fetch book details", resp.StatusCode)
+		return
+	}
+
 	b, err := io.ReadAll(resp.Body)
 	if err != nil {
 		http.Error(w, "Failed to read storage get book response", http.StatusInternalServerError)
