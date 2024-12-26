@@ -12,7 +12,8 @@ const StorageServicePort = "8083"
 
 func main() {
 	bookRepo := repository.NewBooksRepo()
-	storageService := services.NewStorageService(bookRepo)
+	orderRepo := repository.NewOrderRepository()
+	storageService := services.NewStorageService(bookRepo, orderRepo)
 
 	router := storageService.AddRoutes()
 

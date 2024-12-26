@@ -4,18 +4,15 @@ import (
 	"log"
 	"net/http"
 
-	opRepo "github.com/ava-orange-education/Ultimate-Certified-Kubernetes-Application-Developer-CKAD-Certification-Guide/backend/apps/order-processor/repository"
 	opSvc "github.com/ava-orange-education/Ultimate-Certified-Kubernetes-Application-Developer-CKAD-Certification-Guide/backend/apps/order-processor/services"
 )
 
 const (
-	StorageServiceURL          = "http://storage-service:8083"
 	OrderProcessingServicePort = "8082"
 )
 
 func main() {
-	opr := opRepo.NewOrderRepository()
-	ops := opSvc.NewOrderProcessingService(opr)
+	ops := opSvc.NewOrderProcessingService()
 
 	router := ops.AddRoutes()
 

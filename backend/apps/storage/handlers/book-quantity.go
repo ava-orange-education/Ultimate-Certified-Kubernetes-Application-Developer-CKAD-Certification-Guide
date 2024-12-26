@@ -5,14 +5,10 @@ import (
 	"net/http"
 
 	storagemodels "github.com/ava-orange-education/Ultimate-Certified-Kubernetes-Application-Developer-CKAD-Certification-Guide/backend/apps/storage/models"
+	httpPkg "github.com/ava-orange-education/Ultimate-Certified-Kubernetes-Application-Developer-CKAD-Certification-Guide/backend/pkg/http"
 )
 
 func (s *StorageHandler) CheckQuantity(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	bookID := r.URL.Query().Get("id")
 	if bookID == "" {
 		http.Error(w, "Book ID required", http.StatusBadRequest)
@@ -25,15 +21,10 @@ func (s *StorageHandler) CheckQuantity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(map[string]int{"quantity": book.Quantity})
+	httpPkg.JSON(r.Context(), w, http.StatusOK, map[string]int{"quantity": book.Quantity})
 }
 
 func (s *StorageHandler) UpdateQuantity(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPut {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	var updateReq storagemodels.UpdateBookQuantityRequest
 	if err := json.NewDecoder(r.Body).Decode(&updateReq); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
@@ -46,5 +37,5 @@ func (s *StorageHandler) UpdateQuantity(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	json.NewEncoder(w).Encode(book)
+	httpPkg.JSON(r.Context(), w, http.StatusCreated, book)
 }

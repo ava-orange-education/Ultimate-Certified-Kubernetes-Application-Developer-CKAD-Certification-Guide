@@ -56,3 +56,16 @@ func (br *BooksRepo) GetBookByID(id string) (booksmodels.Book, bool) {
 
 	return book, exists
 }
+
+func (br *BooksRepo) GetBooks() []booksmodels.Book {
+	br.mu.Lock()
+	defer br.mu.Unlock()
+
+	bookList := make([]booksmodels.Book, 0)
+
+	for _, b := range br.books {
+		bookList = append(bookList, b)
+	}
+
+	return bookList
+}
