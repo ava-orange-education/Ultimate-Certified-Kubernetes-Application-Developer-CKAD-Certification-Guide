@@ -12,10 +12,16 @@ The service follows a layered architecture:
 
 ## Features
 
-- Manages order status and coordinates with backend and storage services
-- Integrates with storage service for inventory management
-- Handles order persistence and state transitions
-- Designed to support scaling for high-volume order handling
+- Complete order lifecycle management:
+  - Order creation with automatic ID generation
+  - Order status tracking and updates
+  - Order fulfillment coordination
+- Integration with storage service for:
+  - Inventory verification
+  - Order persistence
+  - Status synchronization
+- Robust error handling and validation
+- Designed for high-volume order processing
 
 ## Development
 
@@ -23,21 +29,42 @@ The service follows a layered architecture:
 - Go 1.23.3
 - Access to storage service
 
-### Project Structure
+## API Endpoints
+
+### Order Management
+- `POST /orders/create` - Create a new order
+  - Validates book availability
+  - Generates unique order ID
+  - Initializes order status
+- `PUT /orders/update-status` - Update order status
+  - Manages order state transitions
+  - Synchronizes with storage service
+  - Handles fulfillment workflow
+
+## Project Structure
 ```
 .
 ├── handlers/
-│   └── order.go       # HTTP endpoints
+│   └── order.go           # HTTP endpoint handlers
 ├── models/
-│   ├── order.go       # Order data structures
-│   └── storage-svc.go # Storage service integration
-├── repository/
-│   └── orders.go      # Data persistence
+│   ├── order.go           # Order data structures
+│   └── storage-svc.go     # Storage service integration
 ├── services/
-│   └── order-processor.go # Business logic
-├── main.go            # Application entry point
+│   └── order-processor.go # Core business logic
+├── main.go                # Service entry point
 └── README.md
 ```
+
+## Service Integration
+
+The service operates on port `:8082` and integrates with:
+- Storage Service (`:8083`) for:
+  - Inventory verification
+  - Order persistence
+  - Status management
+- Books Service (`:8081`) for:
+  - Order initiation
+  - Book availability checks
 
 ### Docker Build
 

@@ -4,27 +4,36 @@ The storage service is responsible for managing persistent data storage for the 
 
 ## Features
 
-- Book Details Management
-  - Store and retrieve book information
-  - Update book details
-  - Delete book records
+### Book Management
+- Complete book lifecycle handling:
+  - Book details storage and retrieval
+  - Book metadata management
+  - Book quantity tracking
+  - Inventory adjustments
 
-- Book Quantity Management
-  - Track book inventory levels
-  - Update book quantities
-  - Handle inventory adjustments
+### Order Management
+- Order data persistence
+- Order status tracking
+- Order history maintenance
+- Integration with order processing service
 
 ## API Endpoints
 
-### Book Details
-- `GET /books/{id}` - Retrieve book details by ID
-- `POST /books` - Create new book record
-- `PUT /books/{id}` - Update book details
-- `DELETE /books/{id}` - Remove book record
+All endpoints are internal, accessible only to other microservices.
 
-### Book Quantity
-- `GET /books/{id}/quantity` - Get current book quantity
-- `PUT /books/{id}/quantity` - Update book quantity
+### Book Operations
+- `GET /internal/books/list` - List all books
+- `GET /internal/books/get` - Get book by ID
+- `POST /internal/books/add` - Add new book
+- `PUT /internal/books/update` - Update book details
+- `GET /internal/books/quantity` - Check book quantity
+- `PUT /internal/books/update-quantity` - Update book quantity
+
+### Order Operations
+- `GET /internal/orders/list` - List all orders
+- `GET /internal/orders/get` - Get order by ID
+- `POST /internal/orders/add` - Create new order
+- `PUT /internal/orders/update-status` - Update order status
 
 ## Development
 
@@ -62,7 +71,29 @@ Configuration is managed through Kubernetes ConfigMaps and can be customized by 
 ## Architecture
 
 The service follows a clean architecture pattern:
-- `handlers/` - HTTP request handlers
-- `services/` - Business logic layer
-- `repository/` - Data persistence layer
-- `models/` - Data models and DTOs
+```
+.
+├── handlers/
+│   ├── book-details.go    # Book data operations
+│   ├── book-quantity.go   # Inventory management
+│   ├── order.go          # Order operations
+│   └── storage.go        # Common handler logic
+├── models/
+│   └── request.go        # Data transfer objects
+├── repository/
+│   ├── books.go          # Book data persistence
+│   └── orders.go         # Order data persistence
+├── services/
+│   └── storage.go        # Core business logic
+└── main.go               # Service entry point
+```
+
+## Service Integration
+
+The service operates on port `:8083` and provides internal APIs for:
+- Books Service (`:8081`):
+  - Book catalog operations
+  - Inventory checks
+- Order Processing Service (`:8082`):
+  - Order management
+  - Status updates
