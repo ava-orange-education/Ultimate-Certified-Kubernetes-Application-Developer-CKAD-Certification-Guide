@@ -26,9 +26,12 @@ The project implements a microservices-based bookstore (AvaKart) with the follow
 
 - **Frontend**:
   - React-based user interface
-  - Book browsing and ordering
+  - Book browsing and ordering (currently limited to quantity of 1 per purchase)
   - Real-time inventory display
   - Order status tracking
+  - Future enhancements planned:
+    - Configurable purchase quantities
+    - Order cancellation functionality
 
 These services demonstrate key CKAD concepts including:
 - Multi-container deployments with service discovery
