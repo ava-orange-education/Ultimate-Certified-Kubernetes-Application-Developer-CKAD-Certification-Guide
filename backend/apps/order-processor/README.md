@@ -2,8 +2,36 @@
 
 Go-based service for processing orders in the bookstore application.
 
+## API Endpoints
+
+### Order Management
+- `POST /orders` - Create new order
+  ```json
+  {
+    "bookId": "string",
+    "quantity": 1,
+    "userId": "string"
+  }
+  ```
+- `GET /orders/{id}` - Get order status
+- `GET /orders/user/{userId}` - List user orders
+
+### Health Check
+- `GET /health` - Service health status
+
 ## Development
 
+### Prerequisites
+- Go 1.21
+- Storage Service running on port 8083
+
+### Environment Variables
+```
+STORAGE_SERVICE_URL=http://localhost:8083
+SERVER_PORT=8082
+```
+
+### Running Locally
 ```bash
 go mod download
 go run main.go
@@ -21,7 +49,7 @@ The service uses a multi-stage build process:
 2. Production stage:
    - Base image: alpine:3.18
    - Runs as non-root user for security
-   - Exposes port 8080
+   - Exposes port 8082
 
 ### Building the Image
 
@@ -46,7 +74,18 @@ spec:
       - name: order-processor
         image: order-processor:latest
         ports:
-        - containerPort: 8080
+        - containerPort: 8082
+        env:
+        - name: STORAGE_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: order-config
+              key: STORAGE_SERVICE_URL
+        - name: SERVER_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: order-config
+              key: SERVER_PORT
         securityContext:
           runAsNonRoot: true
           runAsUser: 1000
@@ -60,9 +99,22 @@ spec:
             memory: "256Mi"
 ```
 
+### Service Dependencies
+1. Storage Service
+   - Order data persistence
+   - Inventory updates
+
+### Order Processing Flow
+1. Receive order request from Books Service
+2. Validate order details
+3. Create order record in Storage Service
+4. Update inventory in Storage Service
+5. Return order confirmation
+
 ### Key Features
 - Runs 2 replicas for high availability
 - Secure configuration with non-root user
 - Health checks at /health endpoint
 - Resource limits and requests defined
 - Container security context configured
+- ConfigMap-based configuration
