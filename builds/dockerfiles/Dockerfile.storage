@@ -1,0 +1,24 @@
+FROM golang:1.21-alpine AS builder
+
+WORKDIR /app
+
+COPY backend/apps/storage/go.* ./
+
+RUN go mod download
+
+COPY backend/apps/storage/ ./
+
+RUN CGO_ENABLED=0 GOOS=linux go build -o storage-service main.go
+
+FROM alpine:3.18
+
+WORKDIR /app
+
+COPY --from=builder /app/storage-service .
+
+RUN adduser -D appuser
+USER appuser
+
+EXPOSE 8080
+
+CMD ["./storage-service"]
