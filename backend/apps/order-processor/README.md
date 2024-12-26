@@ -1,98 +1,68 @@
-# AvaKart Order Processing Service
+# Order Processor Service
 
-The order processing service for AvaKart, handling order lifecycle events from submission to fulfillment.
-
-## Architecture
-
-The service follows a layered architecture:
-- `handlers` - HTTP endpoints for order management
-- `services` - Core business logic for order processing
-- `repository` - Data persistence layer
-- `models` - Data structures and storage service integration
-
-## Features
-
-- Complete order lifecycle management:
-  - Order creation with automatic ID generation
-  - Order status tracking and updates
-  - Order fulfillment coordination
-- Integration with storage service for:
-  - Inventory verification
-  - Order persistence
-  - Status synchronization
-- Robust error handling and validation
-- Designed for high-volume order processing
-
-## Configuration
-
-The service can be configured using environment variables:
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| PORT | The port number the service listens on | 8082 |
-| STORAGE_SERVICE_URL | URL of the storage service | http://localhost:8083 |
+Go-based service for processing orders in the bookstore application.
 
 ## Development
 
-### Prerequisites
-- Go 1.23.3
-- Access to storage service
-
-## API Endpoints
-
-### Order Management
-- `POST /orders/create` - Create a new order
-  - Validates book availability
-  - Generates unique order ID
-  - Initializes order status
-- `PUT /orders/update-status` - Update order status
-  - Manages order state transitions
-  - Synchronizes with storage service
-  - Handles fulfillment workflow
-
-## Project Structure
-```
-.
-├── handlers/
-│   └── order.go           # HTTP endpoint handlers
-├── models/
-│   ├── order.go           # Order data structures
-│   └── storage-svc.go     # Storage service integration
-├── services/
-│   └── order-processor.go # Core business logic
-├── main.go                # Service entry point
-└── README.md
-```
-
-## Service Integration
-
-The service operates on port `:8082` and integrates with:
-- Storage Service (`:8083`) for:
-  - Inventory verification
-  - Order persistence
-  - Status management
-- Books Service (`:8081`) for:
-  - Order initiation
-  - Book availability checks
-
-### Docker Build
-
-**Not yet implemeted**
-
-Build the service using the provided Dockerfile:
 ```bash
-docker build -f ../../builds/dockerfiles/Dockerfile.order-processing -t order-processing.svc.avakart .
+go mod download
+go run main.go
 ```
-### Kubernetes Deployment
 
-**Not yet implemeted**
+## Docker
 
-The service can be deployed using Kubernetes:
+The service uses a multi-stage build process:
+
+1. Build stage:
+   - Base image: golang:1.21-alpine
+   - Compiles the Go application with CGO disabled
+   - Produces a statically linked binary
+
+2. Production stage:
+   - Base image: alpine:3.18
+   - Runs as non-root user for security
+   - Exposes port 8080
+
+### Building the Image
+
 ```bash
-kubectl apply -f builds/deployments/k8s/order-processing/
+docker build -t order-processor:latest -f builds/dockerfiles/Dockerfile.order-processing .
 ```
 
-Configuration is managed through Kubernetes ConfigMaps and can be customized by modifying:
-- `builds/deployments/k8s/order-processing/configmap.yaml`
-- `builds/deployments/k8s/order-processing/deployment.yaml`
-- `builds/deployments/k8s/order-processing/service.yaml`
+## Kubernetes Deployment
+
+The service is deployed using Kubernetes:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-processor
+spec:
+  replicas: 2
+  template:
+    spec:
+      containers:
+      - name: order-processor
+        image: order-processor:latest
+        ports:
+        - containerPort: 8080
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          allowPrivilegeEscalation: false
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "200m"
+            memory: "256Mi"
+```
+
+### Key Features
+- Runs 2 replicas for high availability
+- Secure configuration with non-root user
+- Health checks at /health endpoint
+- Resource limits and requests defined
+- Container security context configured
