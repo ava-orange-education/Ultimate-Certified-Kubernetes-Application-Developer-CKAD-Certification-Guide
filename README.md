@@ -4,19 +4,39 @@ This repository contains the resources, source code, and deployment configuratio
 
 ## Overview
 
-The project implements a microservices-based bookstore with the following components:
+The project implements a microservices-based bookstore (AvaKart) with the following components:
 
-- **Books Service**: Manages book catalog and metadata
-- **Storage Service**: Handles inventory and book quantity management
-- **Order Processor**: Processes customer orders and coordinates with storage
-- **Frontend**: React-based user interface for browsing and ordering books
+- **Books Service** (`:8081`): 
+  - Manages book catalog and metadata
+  - Handles book purchase initiation
+  - Provides RESTful APIs for book operations
+  - Integrates with storage and order processing
+
+- **Order Processor** (`:8082`):
+  - Manages complete order lifecycle
+  - Handles order status transitions
+  - Coordinates with storage for persistence
+  - Provides order fulfillment workflow
+
+- **Storage Service** (`:8083`):
+  - Centralized data persistence
+  - Book inventory management
+  - Order data storage
+  - Internal APIs for service integration
+
+- **Frontend**:
+  - React-based user interface
+  - Book browsing and ordering
+  - Real-time inventory display
+  - Order status tracking
 
 These services demonstrate key CKAD concepts including:
-- Multi-container deployments
-- Service networking and communication
-- ConfigMap usage for configuration
-- Container image building and management
-- Kubernetes deployment strategies
+- Multi-container deployments with service discovery
+- Inter-service communication patterns
+- ConfigMap usage for service configuration
+- Container image building and optimization
+- Kubernetes deployment strategies and scaling
+- Service mesh integration capabilities
 
 ## Directory Structure
 
@@ -35,10 +55,11 @@ These services demonstrate key CKAD concepts including:
 ## Getting Started
 
 ### Prerequisites
-- Docker and Docker Compose for local development
-- Kubernetes cluster (local or remote) for deployment
+- Docker and Docker Compose (v2.0+) for local development
+- Kubernetes cluster (v1.24+) for deployment
 - Go 1.23.3 for backend services
-- Node.js for frontend development
+- Node.js 18+ for frontend development
+- MongoDB for storage service
 
 ### Local Development
 1. Clone the repository

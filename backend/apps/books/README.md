@@ -88,17 +88,24 @@ This will create:
 
 ## API Documentation
 
-The service provides the following REST endpoints:
+The service provides the following REST endpoints under `/api/books`:
 
 ### Book Management
-- `GET /books/list` - List all books
-- `GET /books/get?id={bookId}` - Get book details by ID
-- `POST /books/add` - Add a new book
+- `GET /list` - List all available books
+- `GET /details?id={bookId}` - Get detailed book information by ID
+- `POST /add` - Add a new book to the catalog
+  - Automatically generates UUID-based book ID
+  - Associates book with seller ID
 
 ### Purchase Operations
-- `POST /orders/purchase` - Initiate book purchase
-  - Validates book availability
+- `POST /purchase` - Initiate book purchase
+  - Associates purchase with buyer ID
+  - Validates book availability through storage service
   - Creates order through order processing service
   - Manages inventory updates
 
-Each endpoint integrates with appropriate backend services for data persistence and order processing. Detailed API specifications including request/response formats will be maintained in a separate API documentation.
+Each endpoint integrates with appropriate backend services:
+- Storage Service (`:8083`) for data persistence and inventory
+- Order Processing Service (`:8082`) for order management
+
+Detailed request/response formats and examples are available in the API documentation.
