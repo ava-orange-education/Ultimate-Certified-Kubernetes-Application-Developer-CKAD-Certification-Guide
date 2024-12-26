@@ -7,18 +7,13 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 )
 
-const (
-	StorageServiceURL  = "http://localhost:8083"
-	OrderProcessingURL = "http://localhost:8082"
-)
-
 type BooksService struct {
 	bh handlers.BooksHandler
 }
 
-func NewBooksService() *BooksService {
+func NewBooksService(storageURL, orderProcessorURL string) *BooksService {
 	return &BooksService{
-		bh: *handlers.NewBooksHandler(StorageServiceURL, OrderProcessingURL),
+		bh: *handlers.NewBooksHandler(storageURL, orderProcessorURL),
 	}
 }
 

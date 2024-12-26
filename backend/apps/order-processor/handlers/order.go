@@ -16,15 +16,13 @@ import (
 	"github.com/google/uuid"
 )
 
-const StorageServiceURL = "http://localhost:8083"
-
 type OrdersHandler struct {
 	storageServiceURL string
 }
 
-func NewOrdersHandler() *OrdersHandler {
+func NewOrdersHandler(storageURL string) *OrdersHandler {
 	return &OrdersHandler{
-		storageServiceURL: StorageServiceURL,
+		storageServiceURL: storageURL,
 	}
 }
 

@@ -11,9 +11,9 @@ type OrderProcessingService struct {
 	oph *opHandlers.OrdersHandler
 }
 
-func NewOrderProcessingService() *OrderProcessingService {
+func NewOrderProcessingService(storageURL string) *OrderProcessingService {
 	return &OrderProcessingService{
-		oph: opHandlers.NewOrdersHandler(),
+		oph: opHandlers.NewOrdersHandler(storageURL),
 	}
 }
 
