@@ -1,0 +1,24 @@
+FROM golang:1.21-alpine AS builder
+
+WORKDIR /app
+
+COPY backend/apps/order-processor/go.* ./
+
+RUN go mod download
+
+COPY backend/apps/order-processor/ ./
+
+RUN CGO_ENABLED=0 GOOS=linux go build -o order-processor main.go
+
+FROM alpine:3.18
+
+WORKDIR /app
+
+COPY --from=builder /app/order-processor .
+
+RUN adduser -D appuser
+USER appuser
+
+EXPOSE 8080
+
+CMD ["./order-processor"]
