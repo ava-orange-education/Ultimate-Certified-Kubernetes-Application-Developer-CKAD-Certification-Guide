@@ -17,6 +17,9 @@ spec:
       containers:
       - name: frontend
         image: frontend:latest
+        env:
+        - name: VITE_API_BASE_URL
+          value: "http://books-service:8081"  # Default to internal k8s service name
         ports:
         - containerPort: 80
         resources:
