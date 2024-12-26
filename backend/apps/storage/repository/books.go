@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+	"fmt"
 	"sync"
 
 	booksmodels "github.com/ava-orange-education/Ultimate-Certified-Kubernetes-Application-Developer-CKAD-Certification-Guide/backend/apps/books/models"
@@ -39,6 +40,8 @@ func (br *BooksRepo) UpdateBookQuantity(req storagemodels.UpdateBookQuantityRequ
 	if _, exists := br.GetBookByID(req.BookID); !exists {
 		return booksmodels.Book{}, errors.New("book not found")
 	}
+
+	fmt.Println("----> q", req.Quantity)
 
 	br.mu.Lock()
 	book := br.books[req.BookID]
