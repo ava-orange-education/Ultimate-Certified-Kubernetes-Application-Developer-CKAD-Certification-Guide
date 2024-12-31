@@ -1,0 +1,59 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: inventory-updater
+  labels:
+    app: storage-service
+    type: scheduled
+  annotations:
+    description: "Scheduled job for updating inventory statistics"
+spec:
+  # Run every day at midnight
+  schedule: "0 0 * * *"
+  # Deadline for starting job if scheduled time is missed (1 hour)
+  startingDeadlineSeconds: 3600
+  # Concurrency policy: forbid new job if previous is still running
+  concurrencyPolicy: Forbid
+  # Keep 3 successful and 1 failed job in history
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      # Time limit for job execution (1 hour)
+      activeDeadlineSeconds: 3600
+      template:
+        metadata:
+          labels:
+            app: storage-service
+            type: scheduled
+        spec:
+          containers:
+          - name: inventory-updater
+            image: storage-service:1.0.0
+            command: ["./inventory-update"]    # Example update script
+            args: ["--type=daily", "--generate-report=true"]
+            env:
+            - name: REPORT_PATH
+              value: "/reports"
+            resources:
+              requests:
+                cpu: "150m"     # Moderate resource allocation for daily task
+                memory: "200Mi"
+              limits:
+                cpu: "300m"
+                memory: "400Mi"
+            # Mount point for reports (example)
+            volumeMounts:
+            - name: report-volume
+              mountPath: "/reports"
+            securityContext:
+              runAsNonRoot: true
+              runAsUser: 1000
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+          # Example volume for storing reports
+          volumes:
+          - name: report-volume
+            emptyDir: {}
+          # Don't restart on completion
+          restartPolicy: Never
