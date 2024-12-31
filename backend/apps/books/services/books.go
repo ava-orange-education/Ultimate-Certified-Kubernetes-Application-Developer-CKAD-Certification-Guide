@@ -33,6 +33,7 @@ func (bs *BooksService) AddRoutes() *chi.Mux {
 	router.Use(middleware.Logger)
 	router.Use(middleware.Recoverer)
 
+	// API routes
 	router.Route("/api/books", func(r chi.Router) {
 		r.Get("/list", bs.bh.ListBooks)
 		r.Post("/add", bs.bh.AddBook)

@@ -1,0 +1,45 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: order-batch-processor
+  labels:
+    app: order-processor
+    type: batch
+  annotations:
+    description: "One-time batch job for processing pending orders"
+spec:
+  # Number of successful pod completions required
+  completions: 1
+  # Number of pods to run in parallel
+  parallelism: 1
+  # Time limit for job completion (3 hours)
+  activeDeadlineSeconds: 10800
+  # Number of retries before marking job as failed
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app: order-processor
+        type: batch
+    spec:
+      containers:
+      - name: order-batch-processor
+        image: order-processor:1.0.0
+        command: ["./batch-processor"]    # Example batch processing command
+        args: ["--mode=batch", "--limit=1000"]
+        env:
+        - name: STORAGE_SERVICE_URL
+          value: "http://storage-service:8083"
+        resources:
+          requests:
+            cpu: "200m"      # Higher CPU for batch processing
+            memory: "256Mi"
+          limits:
+            cpu: "400m"
+            memory: "512Mi"
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          allowPrivilegeEscalation: false
+      # Ensure job pod terminates upon completion
+      restartPolicy: Never
