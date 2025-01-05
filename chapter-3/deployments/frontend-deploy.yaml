@@ -31,11 +31,4 @@ spec:
         env:
         - name: VITE_API_BASE_URL
           value: "http://books-service:8081"
-        resources:
-          requests:
-            cpu: "100m"
-            memory: "128Mi"
-          limits:
-            cpu: "200m"
-            memory: "256Mi"
       terminationGracePeriodSeconds: 60    # Time for graceful shutdown
