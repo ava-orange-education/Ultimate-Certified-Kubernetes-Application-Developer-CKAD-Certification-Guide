@@ -30,16 +30,5 @@ spec:
         env:
         - name: STORAGE_SERVICE_URL
           value: "http://storage-service:8083"
-        resources:
-          requests:
-            cpu: "200m"      # Higher CPU for batch processing
-            memory: "256Mi"
-          limits:
-            cpu: "400m"
-            memory: "512Mi"
-        securityContext:
-          runAsNonRoot: true
-          runAsUser: 1000
-          allowPrivilegeEscalation: false
       # Ensure job pod terminates upon completion
       restartPolicy: Never

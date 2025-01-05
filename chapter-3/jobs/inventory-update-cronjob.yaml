@@ -35,25 +35,3 @@ spec:
             env:
             - name: REPORT_PATH
               value: "/reports"
-            resources:
-              requests:
-                cpu: "150m"     # Moderate resource allocation for daily task
-                memory: "200Mi"
-              limits:
-                cpu: "300m"
-                memory: "400Mi"
-            # Mount point for reports (example)
-            volumeMounts:
-            - name: report-volume
-              mountPath: "/reports"
-            securityContext:
-              runAsNonRoot: true
-              runAsUser: 1000
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-          # Example volume for storing reports
-          volumes:
-          - name: report-volume
-            emptyDir: {}
-          # Don't restart on completion
-          restartPolicy: Never

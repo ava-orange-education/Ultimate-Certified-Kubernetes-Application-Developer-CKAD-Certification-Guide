@@ -13,27 +13,3 @@ spec:
     env:
     - name: PORT           # Service configuration
       value: "8083"
-    resources:
-      requests:
-        cpu: "100m"
-        memory: "128Mi"
-      limits:
-        cpu: "200m"
-        memory: "256Mi"
-    # Health checking for storage service
-    livenessProbe:
-      httpGet:
-        path: /health
-        port: 8083
-      initialDelaySeconds: 5
-      periodSeconds: 10
-    readinessProbe:
-      httpGet:
-        path: /health
-        port: 8083
-      initialDelaySeconds: 3
-      periodSeconds: 5
-    securityContext:      # Security settings for data storage service
-      runAsNonRoot: true           # Prevent root user execution
-      runAsUser: 1000              # Specific non-root user
-      allowPrivilegeEscalation: false   # Prevent privilege escalation

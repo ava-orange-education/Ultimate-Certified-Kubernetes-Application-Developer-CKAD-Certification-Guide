@@ -9,11 +9,6 @@ metadata:
     kubernetes.io/change-cause: "Initial deployment of frontend v1.0.0"    # Helps track deployment history
 spec:
   replicas: 3
-  strategy:
-    type: RollingUpdate    # Ensures zero-downtime updates
-    rollingUpdate:
-      maxSurge: 1          # Maximum number of pods above desired count
-      maxUnavailable: 1    # Maximum number of pods that can be unavailable
   selector:
     matchLabels:
       app: frontend

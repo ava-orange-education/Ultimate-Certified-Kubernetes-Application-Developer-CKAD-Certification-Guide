@@ -10,11 +10,6 @@ metadata:
     kubernetes.io/change-cause: "Initial deployment of storage service v1.0.0"
 spec:
   replicas: 2
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 0    # Maintain data availability during updates
   selector:
     matchLabels:
       app: storage-service
@@ -33,17 +28,5 @@ spec:
         env:
         - name: PORT
           value: "8083"
-        resources:
-          requests:
-            cpu: "100m"
-            memory: "128Mi"
-          limits:
-            cpu: "200m"
-            memory: "256Mi"
-        securityContext:
-          runAsNonRoot: true
-          runAsUser: 1000
-          allowPrivilegeEscalation: false
-          readOnlyRootFilesystem: true    # Additional security for data service
       # Extended grace period for data consistency
       terminationGracePeriodSeconds: 180    # Allow time for connection draining

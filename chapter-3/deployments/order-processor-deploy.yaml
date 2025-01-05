@@ -10,11 +10,6 @@ metadata:
     kubernetes.io/change-cause: "Initial deployment of order processor v1.0.0"
 spec:
   replicas: 2
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 0    # Ensure processing capacity during updates
   selector:
     matchLabels:
       app: order-processor
