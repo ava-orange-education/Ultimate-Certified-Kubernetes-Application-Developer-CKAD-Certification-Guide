@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: books-rs
+  labels:
+    app: books-service
+    tier: backend     # Identifies this as a backend component
+spec:
+  # Define replica count for the backend service
+  replicas: 2        # Fewer replicas than frontend as backend is typically less resource-intensive
+  
+  # Selector for pod management
+  selector:
+    matchLabels:
+      app: books-service
+      tier: backend
+  
+  # Pod template
+  template:
+    metadata:
+      labels:
+        app: books-service
+        tier: backend
+    spec:
+      containers:
+      - name: books-service
+        image: books-service:latest
+        ports:
+        - containerPort: 8081
+        env:
+        - name: PORT
+          value: "8081"
+        - name: STORAGE_SERVICE_URL     # Backend service dependencies
+          value: "http://storage-service:8083"
+        - name: ORDER_PROCESSOR_URL
+          value: "http://order-processor:8082"
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "200m"
+            memory: "256Mi"
+        # Health checking specific to backend service
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8081
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        securityContext:      # Additional security for backend service
+          runAsNonRoot: true
+          runAsUser: 1000
+          allowPrivilegeEscalation: false

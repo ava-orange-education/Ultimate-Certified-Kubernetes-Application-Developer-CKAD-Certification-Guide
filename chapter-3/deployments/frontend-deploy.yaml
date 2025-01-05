@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+  labels:
+    app: frontend
+    tier: frontend
+  annotations:
+    kubernetes.io/change-cause: "Initial deployment of frontend v1.0.0"    # Helps track deployment history
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate    # Ensures zero-downtime updates
+    rollingUpdate:
+      maxSurge: 1          # Maximum number of pods above desired count
+      maxUnavailable: 1    # Maximum number of pods that can be unavailable
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+        version: "1.0.0"    # Version label for tracking
+    spec:
+      containers:
+      - name: frontend
+        image: frontend:1.0.0    # Specific version tag
+        ports:
+        - containerPort: 80
+        env:
+        - name: VITE_API_BASE_URL
+          value: "http://books-service:8081"
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "200m"
+            memory: "256Mi"
+      terminationGracePeriodSeconds: 60    # Time for graceful shutdown

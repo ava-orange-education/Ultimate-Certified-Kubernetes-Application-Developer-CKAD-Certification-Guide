@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: order-processor-pod
+  labels:
+    app: order-processor    # Service identifier
+spec:
+  containers:
+  - name: order-processor
+    image: order-processor:latest
+    ports:
+    - containerPort: 8082   # Order processing service port
+    env:
+    - name: PORT
+      value: "8082"
+    - name: STORAGE_SERVICE_URL     # Dependency on storage service
+      value: "http://storage-service:8083"
+    resources:
+      requests:
+        cpu: "100m"
+        memory: "128Mi"
+      limits:
+        cpu: "200m"
+        memory: "256Mi"
+    # Health checking configuration
+    livenessProbe:
+      httpGet:
+        path: /health
+        port: 8082
+      initialDelaySeconds: 5
+      periodSeconds: 10
+    readinessProbe:
+      httpGet:
+        path: /health
+        port: 8082
+      initialDelaySeconds: 3
+      periodSeconds: 5
+    securityContext:      # Security configuration
+      runAsNonRoot: true           # Security best practice
+      runAsUser: 1000              # Run as non-privileged user
+      allowPrivilegeEscalation: false   # Prevent privilege escalation
