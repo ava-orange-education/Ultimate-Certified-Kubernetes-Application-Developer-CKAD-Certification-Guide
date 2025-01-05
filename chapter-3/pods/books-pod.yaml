@@ -17,27 +17,3 @@ spec:
       value: "http://storage-service:8083"
     - name: ORDER_PROCESSOR_URL
       value: "http://order-processor:8082"
-    resources:
-      requests:
-        cpu: "100m"
-        memory: "128Mi"
-      limits:
-        cpu: "200m"
-        memory: "256Mi"
-    # Health checking endpoints
-    livenessProbe:
-      httpGet:
-        path: /health    # Health check endpoint
-        port: 8081
-      initialDelaySeconds: 5
-      periodSeconds: 10
-    readinessProbe:
-      httpGet:
-        path: /health
-        port: 8081
-      initialDelaySeconds: 3
-      periodSeconds: 5
-    securityContext:      # Pod security settings
-      runAsNonRoot: true           # Prevents running as root user
-      runAsUser: 1000              # Specific non-root user ID
-      allowPrivilegeEscalation: false   # Prevents privilege escalation

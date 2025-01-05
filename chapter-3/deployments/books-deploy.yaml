@@ -9,11 +9,6 @@ metadata:
     kubernetes.io/change-cause: "Initial deployment of books service v1.0.0"
 spec:
   replicas: 2
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 0    # Zero downtime for backend service
   selector:
     matchLabels:
       app: books-service
@@ -35,16 +30,5 @@ spec:
           value: "http://storage-service:8083"
         - name: ORDER_PROCESSOR_URL
           value: "http://order-processor:8082"
-        resources:
-          requests:
-            cpu: "100m"
-            memory: "128Mi"
-          limits:
-            cpu: "200m"
-            memory: "256Mi"
-        securityContext:
-          runAsNonRoot: true
-          runAsUser: 1000
-          allowPrivilegeEscalation: false
       # Graceful shutdown period for backend connections
       terminationGracePeriodSeconds: 90
