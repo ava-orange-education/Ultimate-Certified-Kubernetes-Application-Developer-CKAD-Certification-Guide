@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: frontend-rs
+  labels:
+    app: frontend
+    tier: frontend    # Additional label for organizational purposes
+spec:
+  # Define how many replicas of the pod we want
+  replicas: 3        # Maintain 3 instances for high availability
+  
+  # Selector defines how the ReplicaSet finds pods to manage
+  selector:
+    matchLabels:     # Must match pod template labels
+      app: frontend
+  
+  # Template for creating new pods
+  template:
+    metadata:
+      labels:
+        app: frontend    # These labels must match the selector above
+    spec:
+      containers:
+      - name: frontend
+        image: frontend:latest
+        ports:
+        - containerPort: 80
+        env:
+        - name: VITE_API_BASE_URL    # Environment variable for API connectivity
+          value: "http://books-service:8081"
+        resources:
+          requests:         # Minimum resources needed
+            cpu: "100m"
+            memory: "128Mi"
+          limits:          # Maximum resources allowed
+            cpu: "200m"
+            memory: "256Mi"
+        livenessProbe:     # Health checking
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 10
