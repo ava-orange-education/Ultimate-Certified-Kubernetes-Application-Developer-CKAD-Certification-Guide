@@ -34,21 +34,3 @@ spec:
           value: "http://storage-service:8083"
         - name: ORDER_PROCESSOR_URL
           value: "http://order-processor:8082"
-        resources:
-          requests:
-            cpu: "100m"
-            memory: "128Mi"
-          limits:
-            cpu: "200m"
-            memory: "256Mi"
-        # Health checking specific to backend service
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 8081
-          initialDelaySeconds: 5
-          periodSeconds: 10
-        securityContext:      # Additional security for backend service
-          runAsNonRoot: true
-          runAsUser: 1000
-          allowPrivilegeEscalation: false
