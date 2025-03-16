@@ -1,9 +1,13 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: storage-service
+  name: storage-deployment
   labels:
     app: storage-service
+    tier: backend
+    component: storage
+  annotations:
+    kubernetes.io/change-cause: "Added logging sidecar to storage service"
 spec:
   replicas: 2
   selector:
@@ -13,38 +17,20 @@ spec:
     metadata:
       labels:
         app: storage-service
+        version: "1.0.0"
+        component: storage
     spec:
       containers:
       - name: storage-service
-        image: storage-service:latest
+        image: storage-service:1.0.0
         ports:
         - containerPort: 8083
         env:
         - name: PORT
           value: "8083"
-        resources:
-          requests:
-            cpu: "100m"
-            memory: "128Mi"
-          limits:
-            cpu: "200m"
-            memory: "256Mi"
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 8083
-          initialDelaySeconds: 5
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /health
-            port: 8083
-          initialDelaySeconds: 3
-          periodSeconds: 5
-        securityContext:
-          runAsNonRoot: true
-          runAsUser: 1000
-          allowPrivilegeEscalation: false
+        volumeMounts:
+        - name: log-storage
+          mountPath: /app/logs
       - name: log-collector
         image: busybox:latest
         command: ['sh', '-c', 'tail -f /logs/storage-service.log']
