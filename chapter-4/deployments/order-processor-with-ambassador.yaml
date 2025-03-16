@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: order-processor
+  name: order-processor-with-ambassador
   labels:
     app: order-processor
 spec:
@@ -61,3 +61,7 @@ spec:
           limits:
             cpu: "100m"
             memory: "128Mi"
+      volumes:
+      - name: nginx-config
+        configMap:
+          name: storage-proxy-config

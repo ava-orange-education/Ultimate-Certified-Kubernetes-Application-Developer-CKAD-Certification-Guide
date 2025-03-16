@@ -1,4 +1,4 @@
-.PHONY: apply-sidecar delete-sidecar apply-init delete-init
+.PHONY: apply-sidecar delete-sidecar apply-init delete-init apply-ambassador delete-ambassador
 
 # Sidecar Pattern
 apply-sidecar:
@@ -13,11 +13,20 @@ delete-sidecar:
 apply-init:
 	@echo "Applying books deployment with init container..."
 	kubectl apply -f deployments/books-deploy-with-init.yaml
-	@echo "Applying books pod with init container..."
-	kubectl apply -f pods/books-pod-with-init.yaml
 
 delete-init:
 	@echo "Deleting books deployment with init container..."
 	kubectl delete -f deployments/books-deploy-with-init.yaml
-	@echo "Deleting books pod with init container..."
-	kubectl delete -f pods/books-pod-with-init.yaml
+
+# Ambassador Pattern
+apply-ambassador:
+	@echo "Applying storage ambassador ConfigMap..."
+	kubectl apply -f deployments/storage-ambassador-configmap.yaml
+	@echo "Applying order processor deployment with ambassador..."
+	kubectl apply -f deployments/order-processor-with-ambassador.yaml
+
+delete-ambassador:
+	@echo "Deleting order processor deployment with ambassador..."
+	kubectl delete -f deployments/order-processor-with-ambassador.yaml
+	@echo "Deleting storage ambassador ConfigMap..."
+	kubectl delete -f deployments/storage-ambassador-configmap.yaml
