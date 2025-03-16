@@ -1,6 +1,8 @@
 package services
 
 import (
+	"net/http"
+
 	"github.com/ava-orange-education/Ultimate-Certified-Kubernetes-Application-Developer-CKAD-Certification-Guide/backend/apps/storage/handlers"
 	"github.com/ava-orange-education/Ultimate-Certified-Kubernetes-Application-Developer-CKAD-Certification-Guide/backend/apps/storage/repository"
 
@@ -25,6 +27,11 @@ func (ss *StorageService) AddRoutes() *chi.Mux {
 
 	router.Use(middleware.Logger)
 	router.Use(middleware.Recoverer)
+
+	router.Get("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("OK"))
+	})
 
 	router.Route("/internal/books", func(r chi.Router) {
 		r.Get("/list", ss.sh.ListBooks)
