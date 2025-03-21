@@ -40,6 +40,10 @@ These services demonstrate key CKAD concepts including:
 - Container image building and optimization
 - Kubernetes deployment strategies and scaling
 - Service mesh integration capabilities
+- Multi-container pod design patterns:
+  - Sidecar pattern (logging sidecar for storage service)
+  - Init container pattern (dependency checking for books service)
+  - Ambassador pattern (proxy for order processor)
 
 ## Directory Structure
 
@@ -54,6 +58,13 @@ These services demonstrate key CKAD concepts including:
     - `k8s/` - Kubernetes manifests organized by service
     - `docker-compose.yaml` - Local development environment setup
 - `scripts/` - Utility scripts for setup and cleanup
+- `chapter-3/` - Basic Kubernetes resources (pods, deployments, jobs)
+- `chapter-4/` - Multi-container pod patterns
+  - `configmaps/` - ConfigMaps for ambassador pattern
+  - `deployments/` - Multi-container pod implementations
+    - Sidecar pattern (storage service with logging)
+    - Init container pattern (books service with dependency check)
+    - Ambassador pattern (order processor with proxy)
 
 ## Getting Started
 
@@ -100,6 +111,14 @@ The `builds/deployments/k8s/` directory contains service-specific manifests:
 Each service can be deployed using:
 ```bash
 kubectl apply -f builds/deployments/k8s/<service-name>/
+```
+
+For the multi-container pod patterns in Chapter 4, use:
+```bash
+kubectl apply -f chapter-4/configmaps/storage-ambassador-configmap.yaml
+kubectl apply -f chapter-4/deployments/storage-deploy-with-sidecar.yaml
+kubectl apply -f chapter-4/deployments/books-deploy-with-init.yaml
+kubectl apply -f chapter-4/deployments/order-processor-with-ambassador.yaml
 ```
 
 ### Service Communication
