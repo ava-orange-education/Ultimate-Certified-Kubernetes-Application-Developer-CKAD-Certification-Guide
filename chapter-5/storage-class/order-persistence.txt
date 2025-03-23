@@ -1,0 +1,93 @@
+package storageclass
+
+// OrderDataManager handles persisting order data to disk
+type OrderDataManager struct {
+    ordersDir string
+    mu        sync.Mutex
+}
+// NewOrderDataManager creates a new order data manager
+func NewOrderDataManager() *OrderDataManager {
+    ordersDir := os.Getenv("ORDER_DATA_DIR")
+    if ordersDir == "" {
+        ordersDir = defaultOrdersDir
+    }
+    
+    return &OrderDataManager{
+        ordersDir: ordersDir,
+    }
+}
+// SaveOrder persists an order to disk
+func (odm *OrderDataManager) SaveOrder(order models.Order) error {
+    odm.mu.Lock()
+    defer odm.mu.Unlock()
+    
+    data, err := json.Marshal(order)
+    if err != nil {
+        return fmt.Errorf("error marshaling order: %v", err)
+    }
+    
+    filePath := filepath.Join(odm.ordersDir, fmt.Sprintf("order_%s.json", order.ID))
+    if err := ioutil.WriteFile(filePath, data, 0644); err != nil {
+        return fmt.Errorf("error writing order file: %v", err)
+    }
+    
+    log.Printf("Order saved to %s", filePath)
+    return nil
+}
+// LoadOrder loads an order from disk
+func (odm *OrderDataManager) LoadOrder(orderID string) (models.Order, error) {
+    odm.mu.Lock()
+    defer odm.mu.Unlock()
+    
+    filePath := filepath.Join(odm.ordersDir, fmt.Sprintf("order_%s.json", orderID))
+    
+    // Check if file exists
+    if _, err := os.Stat(filePath); os.IsNotExist(err) {
+        return models.Order{}, fmt.Errorf("order not found: %s", orderID)
+    }
+    
+    data, err := ioutil.ReadFile(filePath)
+    if err != nil {
+        return models.Order{}, fmt.Errorf("error reading order file: %v", err)
+    }
+    
+    var order models.Order
+    if err := json.Unmarshal(data, &order); err != nil {
+        return models.Order{}, fmt.Errorf("error unmarshaling order: %v", err)
+    }
+    
+    log.Printf("Order loaded from %s", filePath)
+    return order, nil
+}
+// ListOrders lists all orders from disk
+func (odm *OrderDataManager) ListOrders() ([]models.Order, error) {
+    odm.mu.Lock()
+    defer odm.mu.Unlock()
+    
+    pattern := filepath.Join(odm.ordersDir, "order_*.json")
+    matches, err := filepath.Glob(pattern)
+    if err != nil {
+        return nil, fmt.Errorf("error finding order files: %v", err)
+    }
+    
+    orders := make([]models.Order, 0, len(matches))
+    for _, match := range matches {
+        data, err := ioutil.ReadFile(match)
+        if err != nil {
+            log.Printf("Warning: Could not read order file %s: %v", match, err)
+            continue
+        }
+        
+        var order models.Order
+        if err := json.Unmarshal(data, &order); err != nil {
+            log.Printf("Warning: Could not unmarshal order from %s: %v", match, err)
+            continue
+        }
+        
+        orders = append(orders, order)
+    }
+    
+    log.Printf("Loaded %d orders from %s", len(orders), odm.ordersDir)
+    return orders, nil
+}
+
