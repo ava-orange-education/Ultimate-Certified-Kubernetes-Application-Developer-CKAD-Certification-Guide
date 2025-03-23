@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: storage-service
+  name: storage-deployment-with-cache
   labels:
     app: storage-service
 spec:
