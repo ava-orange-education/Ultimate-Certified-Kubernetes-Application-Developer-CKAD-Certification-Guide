@@ -15,13 +15,13 @@ func (s *StorageHandler) CheckQuantity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	book, exists := s.br.GetBookByID(bookID)
+	quantity, exists := s.service.CheckQuantity(bookID)
 	if !exists {
 		http.Error(w, "Book not found", http.StatusNotFound)
 		return
 	}
 
-	httpPkg.JSON(r.Context(), w, http.StatusOK, map[string]int{"quantity": book.Quantity})
+	httpPkg.JSON(r.Context(), w, http.StatusOK, map[string]int{"quantity": quantity})
 }
 
 func (s *StorageHandler) UpdateQuantity(w http.ResponseWriter, r *http.Request) {
@@ -31,7 +31,7 @@ func (s *StorageHandler) UpdateQuantity(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	book, err := s.br.UpdateBookQuantity(updateReq)
+	book, err := s.service.UpdateBookQuantity(updateReq)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return

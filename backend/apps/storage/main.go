@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/ava-orange-education/Ultimate-Certified-Kubernetes-Application-Developer-CKAD-Certification-Guide/backend/apps/storage/handlers"
 	"github.com/ava-orange-education/Ultimate-Certified-Kubernetes-Application-Developer-CKAD-Certification-Guide/backend/apps/storage/repository"
 	"github.com/ava-orange-education/Ultimate-Certified-Kubernetes-Application-Developer-CKAD-Certification-Guide/backend/apps/storage/services"
 )
@@ -50,9 +51,11 @@ func main() {
 
 	bookRepo := repository.NewBooksRepo()
 	orderRepo := repository.NewOrderRepository()
-	storageService := services.NewStorageService(bookRepo, orderRepo)
 
-	router := storageService.AddRoutes()
+	storageService := services.NewStorageService(bookRepo, orderRepo)
+	storageHandler := handlers.NewStorageHandler(storageService)
+
+	router := storageHandler.AddRoutes()
 
 	log.Printf("Storage Service running on :%s", port)
 	if err := http.ListenAndServe(":"+port, router); err != nil {
