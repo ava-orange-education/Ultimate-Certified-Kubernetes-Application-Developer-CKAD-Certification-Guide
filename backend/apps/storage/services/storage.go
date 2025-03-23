@@ -1,53 +1,68 @@
 package services
 
 import (
-	"net/http"
-
-	"github.com/ava-orange-education/Ultimate-Certified-Kubernetes-Application-Developer-CKAD-Certification-Guide/backend/apps/storage/handlers"
+	booksmodels "github.com/ava-orange-education/Ultimate-Certified-Kubernetes-Application-Developer-CKAD-Certification-Guide/backend/apps/books/models"
+	opModels "github.com/ava-orange-education/Ultimate-Certified-Kubernetes-Application-Developer-CKAD-Certification-Guide/backend/apps/order-processor/models"
+	storagemodels "github.com/ava-orange-education/Ultimate-Certified-Kubernetes-Application-Developer-CKAD-Certification-Guide/backend/apps/storage/models"
 	"github.com/ava-orange-education/Ultimate-Certified-Kubernetes-Application-Developer-CKAD-Certification-Guide/backend/apps/storage/repository"
-
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 )
 
 type StorageService struct {
-	sh *handlers.StorageHandler
+	br *repository.BooksRepo
+	or *repository.OrderRepository
 }
 
 func NewStorageService(
 	br *repository.BooksRepo,
 	or *repository.OrderRepository) *StorageService {
 	return &StorageService{
-		sh: handlers.NewStorageHandler(br, or),
+		br: br,
+		or: or,
 	}
 }
 
-func (ss *StorageService) AddRoutes() *chi.Mux {
-	router := chi.NewRouter()
+// Book operations
+func (s *StorageService) AddBook(book booksmodels.Book) {
+	s.br.AddBook(book)
+}
 
-	router.Use(middleware.Logger)
-	router.Use(middleware.Recoverer)
+func (s *StorageService) GetBookByID(bookID string) (booksmodels.Book, bool) {
+	return s.br.GetBookByID(bookID)
+}
 
-	router.Get("/health", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("OK"))
-	})
+func (s *StorageService) GetBooks() []booksmodels.Book {
+	return s.br.GetBooks()
+}
 
-	router.Route("/internal/books", func(r chi.Router) {
-		r.Get("/list", ss.sh.ListBooks)
-		r.Get("/get", ss.sh.GetBook)
-		r.Post("/add", ss.sh.AddBook)
-		r.Put("/update", ss.sh.UpdateBook)
-		r.Get("/quantity", ss.sh.CheckQuantity)
-		r.Put("/update-quantity", ss.sh.UpdateQuantity)
-	})
+func (s *StorageService) UpdateBook(book booksmodels.Book) error {
+	return s.br.UpdateBook(book)
+}
 
-	router.Route("/internal/orders", func(r chi.Router) {
-		r.Get("/list", ss.sh.ListOrders)
-		r.Get("/get", ss.sh.GetOrder)
-		r.Post("/add", ss.sh.AddOrder)
-		r.Put("/update-status", ss.sh.UpdateOrderStatus)
-	})
+func (s *StorageService) CheckQuantity(bookID string) (int, bool) {
+	book, exists := s.br.GetBookByID(bookID)
+	if !exists {
+		return 0, false
+	}
+	return book.Quantity, true
+}
 
-	return router
+func (s *StorageService) UpdateBookQuantity(updateReq storagemodels.UpdateBookQuantityRequest) (booksmodels.Book, error) {
+	return s.br.UpdateBookQuantity(updateReq)
+}
+
+// Order operations
+func (s *StorageService) ListOrders() []opModels.Order {
+	return s.or.ListOrders()
+}
+
+func (s *StorageService) AddOrder(order opModels.Order) {
+	s.or.AddOrder(order)
+}
+
+func (s *StorageService) GetOrderByID(orderID string) (opModels.Order, bool) {
+	return s.or.GetOrderByID(orderID)
+}
+
+func (s *StorageService) UpdateOrderStatus(updateReq opModels.UpdateOrderStatusRequest) (opModels.Order, error) {
+	return s.or.UpdateOrderStatus(updateReq)
 }

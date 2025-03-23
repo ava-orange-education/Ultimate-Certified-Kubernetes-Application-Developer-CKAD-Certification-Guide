@@ -9,7 +9,7 @@ import (
 )
 
 func (s *StorageHandler) ListOrders(w http.ResponseWriter, r *http.Request) {
-	httpPkg.JSON(r.Context(), w, http.StatusOK, s.or.ListOrders())
+	httpPkg.JSON(r.Context(), w, http.StatusOK, s.service.ListOrders())
 }
 
 func (s *StorageHandler) AddOrder(w http.ResponseWriter, r *http.Request) {
@@ -19,7 +19,7 @@ func (s *StorageHandler) AddOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.or.AddOrder(order)
+	s.service.AddOrder(order)
 
 	httpPkg.JSON(r.Context(), w, http.StatusCreated, order)
 }
@@ -31,7 +31,7 @@ func (s *StorageHandler) GetOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	order, exists := s.or.GetOrderByID(orderID)
+	order, exists := s.service.GetOrderByID(orderID)
 	if !exists {
 		http.Error(w, "Order not found", http.StatusNotFound)
 		return
@@ -47,7 +47,7 @@ func (s *StorageHandler) UpdateOrderStatus(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	order, err := s.or.UpdateOrderStatus(os)
+	order, err := s.service.UpdateOrderStatus(os)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return

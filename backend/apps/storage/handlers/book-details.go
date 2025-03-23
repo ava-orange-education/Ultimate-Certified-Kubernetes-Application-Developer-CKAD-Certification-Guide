@@ -15,7 +15,7 @@ func (s *StorageHandler) AddBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.br.AddBook(book)
+	s.service.AddBook(book)
 
 	httpPkg.JSON(r.Context(), w, http.StatusCreated, book)
 }
@@ -27,7 +27,7 @@ func (s *StorageHandler) GetBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	book, exists := s.br.GetBookByID(bookID)
+	book, exists := s.service.GetBookByID(bookID)
 	if !exists {
 		http.Error(w, "Book not found", http.StatusNotFound)
 		return
@@ -37,7 +37,7 @@ func (s *StorageHandler) GetBook(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *StorageHandler) ListBooks(w http.ResponseWriter, r *http.Request) {
-	httpPkg.JSON(r.Context(), w, http.StatusOK, s.br.GetBooks())
+	httpPkg.JSON(r.Context(), w, http.StatusOK, s.service.GetBooks())
 }
 
 func (s *StorageHandler) UpdateBook(w http.ResponseWriter, r *http.Request) {
@@ -47,7 +47,7 @@ func (s *StorageHandler) UpdateBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := s.br.UpdateBook(book); err != nil {
+	if err := s.service.UpdateBook(book); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
