@@ -16,6 +16,7 @@ const (
 	defaultPort = "8083"
 	logDir      = "/app/logs"
 	logFile     = "storage-service.log"
+	cacheDir    = "/app/cache"
 )
 
 func setupLogging() (*os.File, error) {
@@ -36,12 +37,25 @@ func setupLogging() (*os.File, error) {
 	return f, nil
 }
 
+// Add a new function to initialize cache directory
+func setupCache() error {
+	if err := os.MkdirAll(cacheDir, 0755); err != nil {
+		return fmt.Errorf("failed to create cache directory: %v", err)
+	}
+	log.Printf("Cache directory initialized at %s", cacheDir)
+	return nil
+}
+
 func main() {
 	logFile, err := setupLogging()
 	if err != nil {
 		log.Printf("Warning: Could not set up file logging: %v", err)
 	} else {
 		defer logFile.Close()
+	}
+
+	if err := setupCache(); err != nil {
+		log.Printf("Warning: Could not set up cache directory: %v", err)
 	}
 
 	port := os.Getenv("PORT")
@@ -55,7 +69,10 @@ func main() {
 	storageService := services.NewStorageService(bookRepo, orderRepo)
 	storageHandler := handlers.NewStorageHandler(storageService)
 
+	cachedBooksHandler := handlers.NewCachedBooksHandler(storageService)
+
 	router := storageHandler.AddRoutes()
+	cachedBooksHandler.AddCachedRoutes(router)
 
 	log.Printf("Storage Service running on :%s", port)
 	if err := http.ListenAndServe(":"+port, router); err != nil {
