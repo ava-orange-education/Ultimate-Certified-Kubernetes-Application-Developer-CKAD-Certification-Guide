@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+	"log"
 	"sync"
 
 	opModels "github.com/ava-orange-education/Ultimate-Certified-Kubernetes-Application-Developer-CKAD-Certification-Guide/backend/apps/order-processor/models"
@@ -10,11 +11,20 @@ import (
 type OrderRepository struct {
 	orders map[string]opModels.Order
 	mu     sync.RWMutex
+	pm     *PersistenceManager
 }
 
 func NewOrderRepository() *OrderRepository {
+	pm := NewPersistenceManager()
+	orders, err := pm.LoadOrders()
+	if err != nil {
+		log.Printf("Warning: Could not load orders from disk: %v", err)
+		orders = make(map[string]opModels.Order)
+	}
+
 	return &OrderRepository{
-		orders: make(map[string]opModels.Order),
+		orders: orders,
+		pm:     pm,
 	}
 }
 
@@ -22,6 +32,10 @@ func (or *OrderRepository) AddOrder(order opModels.Order) {
 	or.mu.Lock()
 	or.orders[order.ID] = order
 	or.mu.Unlock()
+
+	if err := or.pm.SaveOrders(or.orders); err != nil {
+		log.Printf("Warning: Could not save orders to disk: %v", err)
+	}
 }
 
 func (or *OrderRepository) GetOrderByID(orderID string) (opModels.Order, bool) {
@@ -54,6 +68,10 @@ func (or *OrderRepository) UpdateOrderStatus(uosr opModels.UpdateOrderStatusRequ
 	order.Status = uosr.Status
 	or.orders[uosr.OrderID] = order
 	or.mu.Unlock()
+
+	if err := or.pm.SaveOrders(or.orders); err != nil {
+		log.Printf("Warning: Could not save orders to disk: %v", err)
+	}
 
 	return order, nil
 }

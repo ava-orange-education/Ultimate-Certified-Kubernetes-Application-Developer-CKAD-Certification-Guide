@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: storage-service-restored
+  labels:
+    app: storage-service-restored
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: storage-service-restored
+  template:
+    metadata:
+      labels:
+        app: storage-service-restored
+    spec:
+      containers:
+      - name: storage-service
+        image: storage-service:latest
+        ports:
+        - containerPort: 8083
+        env:
+        - name: PORT
+          value: "8083"
+        - name: DATA_DIR
+          value: "/data"
+        volumeMounts:
+        - name: log-storage
+          mountPath: /app/logs
+        - name: cache-storage
+          mountPath: /app/cache
+        - name: restored-storage
+          mountPath: /data
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "200m"
+            memory: "256Mi"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8083
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8083
+          initialDelaySeconds: 3
+          periodSeconds: 5
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          allowPrivilegeEscalation: false
+      - name: log-collector
+        image: busybox:latest
+        command: ['sh', '-c', 'tail -f /logs/storage-service.log']
+        volumeMounts:
+        - name: log-storage
+          mountPath: /logs
+      volumes:
+      - name: log-storage
+        emptyDir: {}
+      - name: cache-storage
+        emptyDir:
+          sizeLimit: 500Mi
+      - name: restored-storage
+        persistentVolumeClaim:
+          claimName: storage-data-restored-pvc
+      terminationGracePeriodSeconds: 180
