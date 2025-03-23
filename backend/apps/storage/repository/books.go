@@ -2,7 +2,7 @@ package repository
 
 import (
 	"errors"
-	"fmt"
+	"log"
 	"sync"
 
 	booksmodels "github.com/ava-orange-education/Ultimate-Certified-Kubernetes-Application-Developer-CKAD-Certification-Guide/backend/apps/books/models"
@@ -12,11 +12,20 @@ import (
 type BooksRepo struct {
 	books map[string]booksmodels.Book
 	mu    sync.RWMutex
+	pm    *PersistenceManager
 }
 
 func NewBooksRepo() *BooksRepo {
+	pm := NewPersistenceManager()
+	books, err := pm.LoadBooks()
+	if err != nil {
+		log.Printf("Warning: Could not load books from disk: %v", err)
+		books = make(map[string]booksmodels.Book)
+	}
+
 	return &BooksRepo{
-		books: make(map[string]booksmodels.Book),
+		books: books,
+		pm:    pm,
 	}
 }
 
@@ -24,6 +33,10 @@ func (br *BooksRepo) AddBook(book booksmodels.Book) {
 	br.mu.Lock()
 	br.books[book.ID] = book
 	br.mu.Unlock()
+
+	if err := br.pm.SaveBooks(br.books); err != nil {
+		log.Printf("Warning: Could not save books to disk: %v", err)
+	}
 }
 
 func (br *BooksRepo) UpdateBook(book booksmodels.Book) error {
@@ -41,13 +54,15 @@ func (br *BooksRepo) UpdateBookQuantity(req storagemodels.UpdateBookQuantityRequ
 		return booksmodels.Book{}, errors.New("book not found")
 	}
 
-	fmt.Println("----> q", req.Quantity)
-
 	br.mu.Lock()
 	book := br.books[req.BookID]
 	book.Quantity = req.Quantity
 	br.books[req.BookID] = book
 	br.mu.Unlock()
+
+	if err := br.pm.SaveBooks(br.books); err != nil {
+		log.Printf("Warning: Could not save books to disk: %v", err)
+	}
 
 	return book, nil
 }

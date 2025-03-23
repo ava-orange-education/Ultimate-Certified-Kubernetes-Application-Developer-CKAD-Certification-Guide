@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -11,7 +12,21 @@ import (
 const (
 	defaultPort       = "8082"
 	defaultStorageURL = "http://localhost:8083"
+	defaultOrdersDir  = "/orders"
 )
+
+func setupOrdersDir() error {
+	dir := os.Getenv("ORDER_DATA_DIR")
+	if dir == "" {
+		dir = defaultOrdersDir
+	}
+
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return fmt.Errorf("failed to create orders directory: %v", err)
+	}
+	log.Printf("Orders directory initialized at %s", dir)
+	return nil
+}
 
 func main() {
 	port := os.Getenv("PORT")
@@ -22,6 +37,10 @@ func main() {
 	storageURL := os.Getenv("STORAGE_SERVICE_URL")
 	if storageURL == "" {
 		storageURL = defaultStorageURL
+	}
+
+	if err := setupOrdersDir(); err != nil {
+		log.Printf("Warning: Could not set up orders directory: %v", err)
 	}
 
 	ops := opSvc.NewOrderProcessingService(storageURL)

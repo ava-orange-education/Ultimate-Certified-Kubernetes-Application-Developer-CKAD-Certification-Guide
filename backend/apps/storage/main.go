@@ -17,6 +17,7 @@ const (
 	logDir      = "/app/logs"
 	logFile     = "storage-service.log"
 	cacheDir    = "/app/cache"
+	dataDir     = "/data"
 )
 
 func setupLogging() (*os.File, error) {
@@ -37,12 +38,24 @@ func setupLogging() (*os.File, error) {
 	return f, nil
 }
 
-// Add a new function to initialize cache directory
 func setupCache() error {
 	if err := os.MkdirAll(cacheDir, 0755); err != nil {
 		return fmt.Errorf("failed to create cache directory: %v", err)
 	}
 	log.Printf("Cache directory initialized at %s", cacheDir)
+	return nil
+}
+
+func setupDataDir() error {
+	dir := os.Getenv("DATA_DIR")
+	if dir == "" {
+		dir = dataDir
+	}
+
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return fmt.Errorf("failed to create data directory: %v", err)
+	}
+	log.Printf("Data directory initialized at %s", dir)
 	return nil
 }
 
@@ -56,6 +69,10 @@ func main() {
 
 	if err := setupCache(); err != nil {
 		log.Printf("Warning: Could not set up cache directory: %v", err)
+	}
+
+	if err := setupDataDir(); err != nil {
+		log.Printf("Warning: Could not set up data directory: %v", err)
 	}
 
 	port := os.Getenv("PORT")
