@@ -158,35 +158,30 @@ func (s *StorageService) UpdateBookQuantity(updateReq storagemodels.UpdateBookQu
 	return s.br.UpdateBookQuantity(updateReq)
 }
 
-// Order operations
-func (s *StorageService) ListOrders() []opModels.Order {
+type OrderList struct {
+	orders  []opModels.Order
+	Version string `json:"version"`
+}
+
+// ListOrders returns a list of orders with versioning based on feature flags
+// There is no difference in the order list structure, but this is to demonstrate
+// how to handle switch responses based on feature flags in a canary based deployment.
+func (s *StorageService) ListOrders() OrderList {
 	flags := GetFeatureFlags()
 
 	// Use different order format based on feature flag
 	if flags.UseNewOrderFormat {
-		// New order format implementation
-		// In a real system, this might use a different data structure or include additional fields
-		// For demonstration, we're adding a version field to each order
-
-		// Get orders using existing implementation
-		orders := s.or.ListOrders()
-
-		// Enhance orders with additional information (simulating new format)
-		for i := range orders {
-			// Add a version indicator to the order ID to simulate format change
-			// In a real system, this might involve more substantial changes to the data structure
-			if orders[i].ID != "" {
-				orders[i].ID = orders[i].ID + "-v2"
-			}
-
-			// Could also add new fields or transform existing ones in a real implementation
+		return OrderList{
+			orders:  s.or.ListOrders(),
+			Version: "v2",
 		}
-
-		return orders
 	}
 
 	// Use existing implementation for stable version (original format)
-	return s.or.ListOrders()
+	return OrderList{
+		orders:  s.or.ListOrders(),
+		Version: "v1",
+	}
 }
 
 func (s *StorageService) AddOrder(order opModels.Order) {
