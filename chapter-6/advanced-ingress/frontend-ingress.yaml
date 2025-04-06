@@ -1,0 +1,38 @@
+# Ingress for more precise traffic control
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: frontend-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/canary: "true"
+    nginx.ingress.kubernetes.io/canary-weight: "20"
+spec:
+  rules:
+  - host: avakart.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend-green
+            port:
+              number: 80
+---
+# Main ingress (pointing to stable/blue)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: frontend-main-ingress
+spec:
+  rules:
+  - host: avakart.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend-blue
+            port:
+              number: 80
