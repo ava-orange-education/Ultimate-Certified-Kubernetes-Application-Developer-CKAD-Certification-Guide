@@ -1,11 +1,15 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
 	"path/filepath"
+	"syscall"
+	"time"
 
 	"github.com/ava-orange-education/Ultimate-Certified-Kubernetes-Application-Developer-CKAD-Certification-Guide/backend/apps/storage/handlers"
 	"github.com/ava-orange-education/Ultimate-Certified-Kubernetes-Application-Developer-CKAD-Certification-Guide/backend/apps/storage/repository"
@@ -91,8 +95,31 @@ func main() {
 	router := storageHandler.AddRoutes()
 	cachedBooksHandler.AddCachedRoutes(router)
 
-	log.Printf("Storage Service running on :%s", port)
-	if err := http.ListenAndServe(":"+port, router); err != nil {
-		log.Fatalf("error starting server: %v", err)
+	srv := &http.Server{
+		Addr:    ":" + port,
+		Handler: router,
 	}
+
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
+
+	go func() {
+		log.Printf("Storage Service running on :%s", port)
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("Server error: %v", err)
+		}
+	}()
+
+	<-stop
+
+	log.Println("Shutting down gracefully...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Fatalf("Forced shutdown: %v", err)
+	}
+
+	log.Println("Server gracefully stopped")
 }
