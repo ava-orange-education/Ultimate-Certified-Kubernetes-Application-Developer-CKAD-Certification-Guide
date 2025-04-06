@@ -1,0 +1,69 @@
+# Main deployment (stable version)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: storage-stable
+  labels:
+    app: storage-service
+    version: stable
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: storage-service
+      version: stable
+  template:
+    metadata:
+      labels:
+        app: storage-service
+        version: stable
+    spec:
+      containers:
+      - name: storage-service
+        image: storage-service:v1
+        ports:
+        - containerPort: 8083
+        env:
+        - name: SERVICE_VERSION
+          value: "stable"
+---
+# Canary deployment (new version with limited traffic)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: storage-canary
+  labels:
+    app: storage-service
+    version: canary
+spec:
+  replicas: 1  # Limited replicas for canary
+  selector:
+    matchLabels:
+      app: storage-service
+      version: canary
+  template:
+    metadata:
+      labels:
+        app: storage-service
+        version: canary
+    spec:
+      containers:
+      - name: storage-service
+        image: storage-service:v2
+        ports:
+        - containerPort: 8083
+        env:
+        - name: SERVICE_VERSION
+          value: "canary"
+---
+# Service that routes to both deployments
+apiVersion: v1
+kind: Service
+metadata:
+  name: storage-service
+spec:
+  selector:
+    app: storage-service  # Matches both stable and canary
+  ports:
+  - port: 8083
+    targetPort: 8083

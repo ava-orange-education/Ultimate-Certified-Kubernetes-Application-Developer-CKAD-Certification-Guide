@@ -1,0 +1,70 @@
+# Blue deployment (current version)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-blue
+  labels:
+    app: frontend
+    version: blue
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: frontend
+      version: blue
+  template:
+    metadata:
+      labels:
+        app: frontend
+        version: blue
+    spec:
+      containers:
+      - name: frontend
+        image: frontend:v1
+        ports:
+        - containerPort: 80
+        env:
+        - name: VITE_APP_VERSION
+          value: "blue-v1"
+---
+# Green deployment (new version)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-green
+  labels:
+    app: frontend
+    version: green
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: frontend
+      version: green
+  template:
+    metadata:
+      labels:
+        app: frontend
+        version: green
+    spec:
+      containers:
+      - name: frontend
+        image: frontend:v2
+        ports:
+        - containerPort: 80
+        env:
+        - name: VITE_APP_VERSION
+          value: "green-v2"
+---
+# Service pointing to blue deployment initially
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+spec:
+  selector:
+    app: frontend
+    version: blue  # Switch to green when ready to cut over
+  ports:
+  - port: 80
+    targetPort: 80
