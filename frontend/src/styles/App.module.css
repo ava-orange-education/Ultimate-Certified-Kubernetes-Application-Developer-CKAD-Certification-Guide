@@ -5,6 +5,38 @@
   padding: 20px;
 }
 
+.header {
+  text-align: center;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.header h1 {
+  margin: 0;
+  color: #333;
+}
+
+.versionBadge {
+  display: inline-block;
+  background: #007bff;
+  color: white;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.footer {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #ddd;
+  text-align: center;
+  color: #666;
+  font-size: 0.9rem;
+}
+
 .nav {
   background: #333;
   padding: 1rem;
