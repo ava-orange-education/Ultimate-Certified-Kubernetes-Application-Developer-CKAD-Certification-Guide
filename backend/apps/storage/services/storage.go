@@ -159,8 +159,8 @@ func (s *StorageService) UpdateBookQuantity(updateReq storagemodels.UpdateBookQu
 }
 
 type OrderList struct {
-	orders  []opModels.Order
-	Version string `json:"version"`
+	Orders  []opModels.Order `json:"orders"`
+	Version string           `json:"version"`
 }
 
 // ListOrders returns a list of orders with versioning based on feature flags
@@ -172,14 +172,14 @@ func (s *StorageService) ListOrders() OrderList {
 	// Use different order format based on feature flag
 	if flags.UseNewOrderFormat {
 		return OrderList{
-			orders:  s.or.ListOrders(),
+			Orders:  s.or.ListOrders(),
 			Version: "v2",
 		}
 	}
 
 	// Use existing implementation for stable version (original format)
 	return OrderList{
-		orders:  s.or.ListOrders(),
+		Orders:  s.or.ListOrders(),
 		Version: "v1",
 	}
 }
