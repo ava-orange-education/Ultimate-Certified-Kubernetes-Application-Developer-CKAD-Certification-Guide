@@ -1,6 +1,8 @@
 package services
 
 import (
+	"net/http"
+
 	"github.com/ava-orange-education/Ultimate-Certified-Kubernetes-Application-Developer-CKAD-Certification-Guide/backend/apps/books/handlers"
 
 	"github.com/go-chi/chi/v5"
@@ -32,6 +34,12 @@ func (bs *BooksService) AddRoutes() *chi.Mux {
 
 	router.Use(middleware.Logger)
 	router.Use(middleware.Recoverer)
+
+	// Health check endpoint
+	router.Get("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("OK"))
+	})
 
 	// API routes
 	router.Route("/api/books", func(r chi.Router) {
