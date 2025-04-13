@@ -5,18 +5,18 @@ metadata:
   labels:
     app: books-service
   annotations:
-    kubernetes.io/change-cause: "Update to v2 with improved search functionality"
-    app.kubernetes.io/version: "v2"
+    kubernetes.io/change-cause: "Initial deployment of books service v1"
+    app.kubernetes.io/version: "v1"
     app.kubernetes.io/part-of: "avakart"
     app.kubernetes.io/managed-by: "kubectl"
 spec:
-  replicas: 5
-  revisionHistoryLimit: 10  # Store up to 10 revision histories for rollback
+  replicas: 3
+  revisionHistoryLimit: 10
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxSurge: 25%         # Allow 25% extra pods during update
-      maxUnavailable: 25%   # Allow 25% of pods to be unavailable during update
+      maxSurge: 1
+      maxUnavailable: 1
   selector:
     matchLabels:
       app: books-service
@@ -24,25 +24,31 @@ spec:
     metadata:
       labels:
         app: books-service
-        version: "v2"
+        version: "v1"
     spec:
       containers:
       - name: books-service
-        image: books-service:v2
+        image: books-service:v1
         ports:
         - containerPort: 8081
         env:
+        - name: PORT
+          value: "8081"
+        - name: STORAGE_SERVICE_URL
+          value: "http://storage-service:8083"
+        - name: ORDER_PROCESSOR_URL
+          value: "http://order-processor:8082"
         - name: APP_VERSION
-          value: "v2"
+          value: "v1"
         - name: SCHEMA_VERSION
-          value: "2"
+          value: "1"
         readinessProbe:
           httpGet:
             path: /health
             port: 8081
           initialDelaySeconds: 5
           periodSeconds: 10
-          successThreshold: 2
+          successThreshold: 1
           failureThreshold: 3
           timeoutSeconds: 3
         livenessProbe:

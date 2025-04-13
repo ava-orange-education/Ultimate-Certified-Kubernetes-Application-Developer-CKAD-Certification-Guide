@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-processor-deployment
+  labels:
+    app: order-processor
+  annotations:
+    kubernetes.io/change-cause: "Update to v2 with advanced health checking"
+    app.kubernetes.io/version: "v2"
+    app.kubernetes.io/part-of: "avakart"
+    app.kubernetes.io/managed-by: "kubectl"
+spec:
+  replicas: 3
+  revisionHistoryLimit: 10  # Store up to 10 revision histories for rollback
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%         # Allow 25% extra pods during update
+      maxUnavailable: 25%   # Allow 25% of pods to be unavailable during update
+  selector:
+    matchLabels:
+      app: order-processor
+  template:
+    metadata:
+      labels:
+        app: order-processor
+        version: "v2"
+    spec:
+      containers:
+      - name: order-processor
+        image: order-processor:v2
+        ports:
+        - containerPort: 8082
+        env:
+        - name: PORT
+          value: "8082"
+        - name: STORAGE_SERVICE_URL
+          value: "http://localhost:8083"  # Connect to local ambassador
+        - name: APP_VERSION
+          value: "v2"
+        # Readiness probe - checks if pod can receive traffic
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8082
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          successThreshold: 2
+          failureThreshold: 3
+          timeoutSeconds: 3
+        # Liveness probe - checks if pod is running properly
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8082
+          initialDelaySeconds: 15
+          periodSeconds: 20
+          timeoutSeconds: 5
+          failureThreshold: 3
+        # Startup probe - gives application time to start up
+        startupProbe:
+          httpGet:
+            path: /health
+            port: 8082
+          failureThreshold: 30
+          periodSeconds: 10
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "200m"
+            memory: "256Mi"
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          allowPrivilegeEscalation: false
+      - name: storage-ambassador
+        image: nginx:alpine
+        ports:
+        - containerPort: 8083
+        volumeMounts:
+        - name: nginx-config
+          mountPath: /etc/nginx/conf.d
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "64Mi"
+          limits:
+            cpu: "100m"
+            memory: "128Mi"
+      volumes:
+      - name: nginx-config
+        configMap:
+          name: storage-ambassador-config
