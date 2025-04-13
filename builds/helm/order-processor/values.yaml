@@ -1,0 +1,78 @@
+# Default values for order-processor service
+# This is a YAML-formatted file.
+
+replicaCount: 2
+
+image:
+  repository: order-processor
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8082
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: 8082
+  initialDelaySeconds: 5
+  periodSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: 8082
+  initialDelaySeconds: 3
+  periodSeconds: 5
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  allowPrivilegeEscalation: false
+
+env:
+  - name: PORT
+    value: "8082"
+  - name: STORAGE_SERVICE_URL
+    value: "http://localhost:8083"  # Connect to local ambassador
+
+# Storage Ambassador sidecar
+storageAmbassador:
+  enabled: true
+  image: nginx:alpine
+  port: 8083
+  configMap:
+    name: storage-proxy-config
+    defaultConf: |
+      server {
+        listen 8083;
+        location / {
+          proxy_pass http://storage-service:8083;
+        }
+      }
+
+# Persistent Volume settings
+persistence:
+  enabled: false
+  storageClassName: standard
+  accessMode: ReadWriteOnce
+  size: 1Gi
+  mountPath: /app/data
+
+# CronJob settings
+cronJob:
+  enabled: false
+  schedule: "0 * * * *"
+  image: order-processor
+  tag: latest
+  command: ["/app/order-processor", "process-batch"]
+  restartPolicy: OnFailure

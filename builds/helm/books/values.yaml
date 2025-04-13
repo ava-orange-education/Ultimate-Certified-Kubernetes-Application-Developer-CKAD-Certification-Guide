@@ -1,0 +1,54 @@
+# Default values for books service
+# This is a YAML-formatted file.
+
+replicaCount: 2
+
+image:
+  repository: books-service
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8081
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: 8081
+  initialDelaySeconds: 5
+  periodSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: 8081
+  initialDelaySeconds: 3
+  periodSeconds: 5
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  allowPrivilegeEscalation: false
+
+initContainers:
+  serviceCheck:
+    enabled: true
+    image: busybox:latest
+    command: ['sh', '-c', 'until wget -q -O- http://storage-service:8083/health; do echo waiting for storage service; sleep 2; done;']
+
+env:
+  - name: PORT
+    value: "8081"
+  - name: STORAGE_SERVICE_URL
+    value: "http://storage-service:8083"
+  - name: ORDER_PROCESSOR_URL
+    value: "http://order-processor:8082"

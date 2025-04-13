@@ -1,0 +1,53 @@
+# Global values for AvaKart application
+
+# Enable/disable individual charts
+storage:
+  enabled: true
+  
+books:
+  enabled: true
+  
+order-processor:
+  enabled: true
+  
+frontend:
+  enabled: true
+
+# Global settings that can be referenced by all charts
+global:
+  # Environment (dev, staging, prod)
+  environment: dev
+  
+  # Image registry settings
+  imageRegistry: ""
+  imagePullSecrets: []
+  
+  # Common storage class for all PVCs
+  storageClass: standard
+  
+  # Domain settings
+  domain: avakart.example.com
+  
+  # Resource defaults
+  resources:
+    small:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 100m
+        memory: 128Mi
+    medium:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+    large:
+      requests:
+        cpu: 200m
+        memory: 256Mi
+      limits:
+        cpu: 400m
+        memory: 512Mi

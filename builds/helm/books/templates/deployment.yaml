@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "books.fullname" . }}
+  labels:
+    {{- include "books.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "books.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "books.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- if .Values.initContainers.serviceCheck.enabled }}
+      initContainers:
+      - name: service-check
+        image: {{ .Values.initContainers.serviceCheck.image }}
+        command: {{ .Values.initContainers.serviceCheck.command }}
+      {{- end }}
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.service.port }}
+        env:
+        {{- range .Values.env }}
+        - name: {{ .name }}
+          value: {{ .value | quote }}
+        {{- end }}
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
+        livenessProbe:
+          {{- toYaml .Values.livenessProbe | nindent 10 }}
+        readinessProbe:
+          {{- toYaml .Values.readinessProbe | nindent 10 }}
+        securityContext:
+          {{- toYaml .Values.securityContext | nindent 10 }}

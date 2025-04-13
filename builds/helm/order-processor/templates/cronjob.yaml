@@ -1,0 +1,35 @@
+{{- if .Values.cronJob.enabled -}}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "order-processor.fullname" . }}-batch
+  labels:
+    {{- include "order-processor.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.cronJob.schedule | quote }}
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: {{ .Chart.Name }}-batch
+            image: "{{ .Values.cronJob.image }}:{{ .Values.cronJob.tag }}"
+            command: {{ .Values.cronJob.command }}
+            env:
+            {{- range .Values.env }}
+            - name: {{ .name }}
+              value: {{ .value | quote }}
+            {{- end }}
+            {{- if .Values.persistence.enabled }}
+            volumeMounts:
+            - name: data
+              mountPath: {{ .Values.persistence.mountPath }}
+            {{- end }}
+          {{- if .Values.persistence.enabled }}
+          volumes:
+          - name: data
+            persistentVolumeClaim:
+              claimName: {{ include "order-processor.fullname" . }}-data
+          {{- end }}
+          restartPolicy: {{ .Values.cronJob.restartPolicy }}
+{{- end }}
