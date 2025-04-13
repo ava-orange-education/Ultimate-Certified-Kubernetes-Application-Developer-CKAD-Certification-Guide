@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: storage-proxy-config
+data:
+  default.conf: |
+    server {
+      listen 8083;
+      location / {
+        proxy_pass http://storage-service:8083;
+      }
+    }

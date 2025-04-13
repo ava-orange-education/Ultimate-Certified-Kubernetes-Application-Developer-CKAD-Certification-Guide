@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: books-service
+  labels:
+    app: books-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: books-service
+  template:
+    metadata:
+      labels:
+        app: books-service
+    spec:
+      initContainers:
+      - name: service-check
+        image: busybox:latest
+        command: ['sh', '-c', 'until wget -q -O- http://storage-service:8083/health; do echo waiting for storage service; sleep 2; done;']
+      containers:
+      - name: books-service
+        image: books-service:latest
+        ports:
+        - containerPort: 8081
+        env:
+        - name: PORT
+          value: "8081"
+        - name: STORAGE_SERVICE_URL
+          value: "http://storage-service:8083"
+        - name: ORDER_PROCESSOR_URL
+          value: "http://order-processor:8082"
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "200m"
+            memory: "256Mi"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8081
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8081
+          initialDelaySeconds: 3
+          periodSeconds: 5
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          allowPrivilegeEscalation: false
