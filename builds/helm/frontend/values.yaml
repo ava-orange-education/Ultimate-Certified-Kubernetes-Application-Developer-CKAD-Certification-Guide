@@ -1,0 +1,65 @@
+# Default values for frontend service
+# This is a YAML-formatted file.
+
+replicaCount: 2
+
+image:
+  repository: frontend
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
+
+livenessProbe:
+  httpGet:
+    path: /
+    port: 80
+  initialDelaySeconds: 10
+  periodSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /
+    port: 80
+  initialDelaySeconds: 5
+  periodSeconds: 5
+
+env:
+  - name: VITE_API_BASE_URL
+    value: "http://books-service:8081"
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+  hosts:
+    - host: avakart.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+# Blue-Green deployment settings
+blueGreen:
+  enabled: false
+  activeService: blue  # blue or green
+  blue:
+    replicaCount: 2
+  green:
+    replicaCount: 2
+
+# Canary deployment settings
+canary:
+  enabled: false
+  weight: 20  # percentage of traffic to route to canary

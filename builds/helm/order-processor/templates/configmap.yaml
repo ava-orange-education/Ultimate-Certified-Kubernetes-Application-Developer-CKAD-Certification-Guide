@@ -1,0 +1,10 @@
+{{- if .Values.storageAmbassador.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "order-processor.fullname" . }}-nginx-config
+  labels:
+    {{- include "order-processor.labels" . | nindent 4 }}
+data:
+  default.conf: {{ .Values.storageAmbassador.configMap.defaultConf | quote }}
+{{- end }}

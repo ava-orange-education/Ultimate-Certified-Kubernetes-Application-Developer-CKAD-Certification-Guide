@@ -1,0 +1,78 @@
+# Default values for storage service
+# This is a YAML-formatted file.
+
+replicaCount: 2
+
+image:
+  repository: storage-service
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8083
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: 8083
+  initialDelaySeconds: 5
+  periodSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: 8083
+  initialDelaySeconds: 3
+  periodSeconds: 5
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  allowPrivilegeEscalation: false
+
+env:
+  - name: PORT
+    value: "8083"
+
+# Log collector sidecar
+logCollector:
+  enabled: true
+  image: busybox:latest
+  command: ['sh', '-c', 'tail -f /logs/storage-service.log']
+
+# Volumes
+volumes:
+  logs:
+    enabled: true
+    emptyDir: {}
+    mountPath: /app/logs
+  cache:
+    enabled: true
+    emptyDir:
+      sizeLimit: 500Mi
+    mountPath: /app/cache
+
+# Persistent Volume settings
+persistence:
+  enabled: false
+  storageClassName: standard
+  accessMode: ReadWriteOnce
+  size: 1Gi
+  mountPath: /app/data
+
+# Canary deployment settings
+canary:
+  enabled: false
+  weight: 20  # percentage of traffic to route to canary
+
+# Extended grace period for data consistency
+terminationGracePeriodSeconds: 180

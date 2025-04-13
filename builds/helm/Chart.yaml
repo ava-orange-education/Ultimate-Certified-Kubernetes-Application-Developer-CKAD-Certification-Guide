@@ -1,0 +1,23 @@
+apiVersion: v2
+name: avakart
+description: Umbrella Helm chart for AvaKart application
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+dependencies:
+  - name: storage
+    version: 0.1.0
+    repository: file://./storage
+    condition: storage.enabled
+  - name: books
+    version: 0.1.0
+    repository: file://./books
+    condition: books.enabled
+  - name: order-processor
+    version: 0.1.0
+    repository: file://./order-processor
+    condition: order-processor.enabled
+  - name: frontend
+    version: 0.1.0
+    repository: file://./frontend
+    condition: frontend.enabled
