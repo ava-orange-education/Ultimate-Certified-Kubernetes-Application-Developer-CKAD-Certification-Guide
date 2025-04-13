@@ -11,12 +11,12 @@ metadata:
     app.kubernetes.io/managed-by: "kubectl"
 spec:
   replicas: 5
-  revisionHistoryLimit: 10  # Store up to 10 revision histories for rollback
+  revisionHistoryLimit: 10
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxSurge: 25%         # Allow 25% extra pods during update
-      maxUnavailable: 25%   # Allow 25% of pods to be unavailable during update
+      maxSurge: 25%
+      maxUnavailable: 25%
   selector:
     matchLabels:
       app: books-service
@@ -32,10 +32,20 @@ spec:
         ports:
         - containerPort: 8081
         env:
+        - name: PORT
+          value: "8081"
+        - name: STORAGE_SERVICE_URL
+          value: "http://storage-service:8083"
+        - name: ORDER_PROCESSOR_URL
+          value: "http://order-processor:8082"
         - name: APP_VERSION
           value: "v2"
         - name: SCHEMA_VERSION
           value: "2"
+        - name: ENABLE_NEW_SEARCH
+          value: "true"  # This new feature might cause issues
+        - name: SEARCH_TIMEOUT
+          value: "1"     # Very short timeout that might cause problems
         readinessProbe:
           httpGet:
             path: /health
