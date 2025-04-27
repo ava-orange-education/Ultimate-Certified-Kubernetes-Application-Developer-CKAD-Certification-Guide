@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-processor-advanced-health
+  labels:
+    app: order-processor
+  annotations:
+    kubernetes.io/change-cause: "Comprehensive health check implementation"
+    app.kubernetes.io/version: "v1"
+    app.kubernetes.io/part-of: "avakart"
+    app.kubernetes.io/managed-by: "kubectl"
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: order-processor
+  template:
+    metadata:
+      labels:
+        app: order-processor
+    spec:
+      containers:
+      - name: order-processor
+        image: order-processor:v1
+        ports:
+        - containerPort: 8082
+        env:
+        - name: PORT
+          value: "8082"
+        - name: STORAGE_SERVICE_URL
+          value: "http://storage-service:8083"
+        - name: ORDER_DATA_DIR
+          value: "/orders"
+        # Startup probe - gives application time to start up
+        # This prevents liveness probe from killing the pod during startup
+        startupProbe:
+          httpGet:
+            path: /health/startup
+            port: 8082
+          failureThreshold: 30  # Allow up to 5 minutes (30 * 10s) for startup
+          periodSeconds: 10
+          timeoutSeconds: 5
+        
+        # Readiness probe - controls when the pod receives traffic
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: 8082
+          initialDelaySeconds: 5  # Short delay after startup probe succeeds
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+          successThreshold: 2  # Require two consecutive successes
+        
+        # Liveness probe - restarts the pod if it becomes unhealthy
+        livenessProbe:
+          httpGet:
+            path: /health/live
+            port: 8082
+          initialDelaySeconds: 15  # Longer delay to avoid premature restarts
+          periodSeconds: 20
+          timeoutSeconds: 5
+          failureThreshold: 3
+        
+        volumeMounts:
+        - name: orders-volume
+          mountPath: /orders
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          allowPrivilegeEscalation: false
+      volumes:
+      - name: orders-volume
+        emptyDir: {}

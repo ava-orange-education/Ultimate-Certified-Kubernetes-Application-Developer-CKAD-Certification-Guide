@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: books-deployment
+  labels:
+    app: books-service
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: books-service
+  template:
+    metadata:
+      labels:
+        app: books-service
+    spec:
+      containers:
+      - name: books-service
+        image: books-service:v1
+        ports:
+        - containerPort: 8081
+        env:
+        - name: PORT
+          value: "8081"
+        - name: STORAGE_SERVICE_URL
+          value: "http://storage-service:8083"
+        - name: ORDER_PROCESSOR_URL
+          value: "http://order-processor-service:8082"
+        # Liveness probe - checks if the application is running
+        livenessProbe:
+          httpGet:
+            path: /health/live
+            port: 8081
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+          successThreshold: 1
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "200m"
+            memory: "256Mi"
