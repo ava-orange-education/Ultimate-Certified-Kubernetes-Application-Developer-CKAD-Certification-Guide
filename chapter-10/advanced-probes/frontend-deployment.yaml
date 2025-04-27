@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+  labels:
+    app: frontend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: frontend:v1
+        ports:
+        - containerPort: 80
+        env:
+        - name: VITE_API_URL
+          value: "http://books-service:8081/api"
+        # HTTP Probe with Headers and Parameters
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 80
+            httpHeaders:
+            - name: Custom-Header
+              value: Health-Check
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "200m"
+            memory: "256Mi"
