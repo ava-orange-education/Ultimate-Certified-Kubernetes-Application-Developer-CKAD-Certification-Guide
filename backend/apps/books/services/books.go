@@ -35,11 +35,13 @@ func (bs *BooksService) AddRoutes() *chi.Mux {
 	router.Use(middleware.Logger)
 	router.Use(middleware.Recoverer)
 
-	// Health check endpoint
+	// Health check endpoints
 	router.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("OK"))
 	})
+	router.Get("/health/live", handlers.HealthLive)
+	router.Get("/health/ready", handlers.HealthReady)
 
 	// API routes
 	router.Route("/api/books", func(r chi.Router) {
