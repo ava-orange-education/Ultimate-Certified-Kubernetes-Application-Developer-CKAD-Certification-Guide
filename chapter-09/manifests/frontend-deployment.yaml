@@ -26,11 +26,11 @@ spec:
           value: "info"
         - name: LOG_FORMAT
           value: "json"
+        ports:
+        - containerPort: 80
         volumeMounts:
         - name: frontend-logs
           mountPath: /app/logs
-        ports:
-        - containerPort: 80
         resources:
           requests:
             cpu: "100m"

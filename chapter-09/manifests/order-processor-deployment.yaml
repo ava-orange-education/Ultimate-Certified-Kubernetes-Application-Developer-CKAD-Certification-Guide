@@ -89,3 +89,6 @@ spec:
       volumes:
       - name: shared-logs
         emptyDir: {}
+      - name: nginx-config
+        configMap:
+          name: storage-ambassador-config
