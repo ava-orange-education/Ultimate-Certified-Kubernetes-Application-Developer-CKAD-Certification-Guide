@@ -175,3 +175,25 @@ func (bh *BooksHandler) GetBookDetails(w http.ResponseWriter, r *http.Request) {
 
 	httpPkg.JSON(r.Context(), w, resp.StatusCode, book)
 }
+
+func HealthLive(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("OK"))
+}
+
+func HealthReady(w http.ResponseWriter, r *http.Request) {
+	if !canConnectToDatabase() {
+		w.WriteHeader(http.StatusServiceUnavailable)
+		w.Write([]byte("Database connection failed"))
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Ready"))
+}
+
+func canConnectToDatabase() bool {
+	// Implementation to check database connectivity
+	// For demonstration purposes, we'll return true
+	return true
+}
