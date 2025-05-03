@@ -32,10 +32,40 @@ spec:
           value: "http://storage-service:8083"
         - name: ORDER_PROCESSOR_URL
           value: "http://order-processor:8082"
+        # ConfigMap values as environment variables
+        - name: PAGE_SIZE
+          valueFrom:
+            configMapKeyRef:
+              name: books-service-config
+              key: PAGE_SIZE
+        - name: ENABLE_CACHE
+          valueFrom:
+            configMapKeyRef:
+              name: books-service-config
+              key: ENABLE_CACHE
         - name: LOG_LEVEL
-          value: "info"
+          valueFrom:
+            configMapKeyRef:
+              name: books-service-config
+              key: LOG_LEVEL
+        - name: API_VERSION
+          valueFrom:
+            configMapKeyRef:
+              name: books-service-config
+              key: API_VERSION
         - name: LOG_FORMAT
           value: "json"
+        # Secret values as environment variables
+        - name: DB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: books-db-credentials
+              key: username
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: books-db-credentials
+              key: password
         volumeMounts:
         - name: shared-logs
           mountPath: /app/logs

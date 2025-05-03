@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: order-processor-config
+  labels:
+    app: order-processor
+    app.kubernetes.io/part-of: avakart
+data:
+  database.properties: |
+    db.host=postgres
+    db.port=5432
+    db.name=avakart
+    db.pool.size=10
+  cache.properties: |
+    cache.enabled=true
+    cache.ttl=300
+    cache.max.size=1000
