@@ -1,0 +1,23 @@
+apiVersion: extensions/v1beta1  # Deprecated
+kind: Ingress
+metadata:
+  name: avakart-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: avakart.example.com
+    http:
+      paths:
+      - path: /books
+        backend:
+          serviceName: books-service
+          servicePort: 80
+      - path: /orders
+        backend:
+          serviceName: order-processor
+          servicePort: 80
+      - path: /
+        backend:
+          serviceName: frontend
+          servicePort: 80

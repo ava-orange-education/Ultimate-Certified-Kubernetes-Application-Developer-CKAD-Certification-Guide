@@ -1,0 +1,25 @@
+apiVersion: batch/v1beta1  # Deprecated
+kind: CronJob
+metadata:
+  name: inventory-update
+spec:
+  schedule: "0 */6 * * *"  # Every 6 hours
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: inventory-update
+            image: avakart/inventory-updater:v1
+            args:
+            - /bin/sh
+            - -c
+            - "curl -X POST http://storage-service:8083/api/inventory/update"
+            resources:
+              limits:
+                cpu: "200m"
+                memory: "128Mi"
+              requests:
+                cpu: "100m"
+                memory: "64Mi"
+          restartPolicy: OnFailure
