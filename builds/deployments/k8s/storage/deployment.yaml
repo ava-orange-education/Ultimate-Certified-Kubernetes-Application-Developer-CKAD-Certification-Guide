@@ -28,11 +28,18 @@ spec:
           value: "info"
         - name: LOG_FORMAT
           value: "json"
+        # Using all Secret values as environment variables
+        envFrom:
+        - secretRef:
+            name: storage-db-credentials
         volumeMounts:
         - name: log-storage
           mountPath: /app/logs
         - name: cache-storage
           mountPath: /app/cache
+        # Mount ConfigMap as volume
+        - name: config-volume
+          mountPath: /etc/config
         resources:
           requests:
             cpu: "100m"
@@ -71,5 +78,9 @@ spec:
       - name: cache-storage
         emptyDir:
           sizeLimit: 500Mi
+      # ConfigMap volume
+      - name: config-volume
+        configMap:
+          name: storage-service-config
       # Extended grace period for data consistency
       terminationGracePeriodSeconds: 180

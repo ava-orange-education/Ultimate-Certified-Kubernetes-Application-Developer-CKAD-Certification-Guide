@@ -33,6 +33,13 @@ spec:
         volumeMounts:
         - name: shared-logs
           mountPath: /app/logs
+        # Mount ConfigMap as volume
+        - name: config-volume
+          mountPath: /etc/config
+        # Mount Secret as volume
+        - name: secret-volume
+          mountPath: /etc/secrets
+          readOnly: true
         resources:
           requests:
             cpu: "100m"
@@ -89,3 +96,20 @@ spec:
       volumes:
       - name: shared-logs
         emptyDir: {}
+      # Nginx ConfigMap volume
+      - name: nginx-config
+        configMap:
+          name: storage-proxy-config
+      # ConfigMap volume
+      - name: config-volume
+        configMap:
+          name: order-processor-config
+      # Secret volume
+      - name: secret-volume
+        secret:
+          secretName: order-processor-credentials
+          items:
+          - key: username
+            path: db/username
+          - key: password
+            path: db/password
