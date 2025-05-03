@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"log"
@@ -8,6 +9,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strings"
 	"syscall"
 	"time"
 
@@ -17,12 +19,47 @@ import (
 )
 
 const (
-	defaultPort = "8083"
-	logDir      = "/app/logs"
-	logFile     = "storage-service.log"
-	cacheDir    = "/app/cache"
-	dataDir     = "/data"
+	defaultPort       = "8083"
+	logDir            = "/app/logs"
+	logFile           = "storage-service.log"
+	cacheDir          = "/app/cache"
+	dataDir           = "/data"
+	configFilePath    = "/etc/config/application.properties"
+	defaultMaxConns   = "50"
+	defaultTimeout    = "30"
+	defaultRetryCount = "3"
 )
+
+func loadConfigFromFile(filePath string) (map[string]string, error) {
+	config := make(map[string]string)
+
+	file, err := os.Open(filePath)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+
+		parts := strings.SplitN(line, "=", 2)
+		if len(parts) == 2 {
+			key := strings.TrimSpace(parts[0])
+			value := strings.TrimSpace(parts[1])
+			config[key] = value
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+
+	return config, nil
+}
 
 func setupLogging() (*os.File, error) {
 	if err := os.MkdirAll(logDir, 0755); err != nil {
@@ -78,6 +115,47 @@ func main() {
 	if err := setupDataDir(); err != nil {
 		log.Printf("Warning: Could not set up data directory: %v", err)
 	}
+
+	config := make(map[string]string)
+	configLoaded := false
+
+	if _, err := os.Stat(configFilePath); err == nil {
+		config, err = loadConfigFromFile(configFilePath)
+		if err != nil {
+			log.Printf("Warning: Could not load configuration from file: %v", err)
+		} else {
+			configLoaded = true
+			log.Printf("Configuration loaded from %s", configFilePath)
+		}
+	} else {
+		log.Printf("Configuration file not found at %s, using defaults", configFilePath)
+	}
+
+	dataPath := dataDir
+	if configLoaded && config["data.path"] != "" {
+		dataPath = config["data.path"]
+	}
+
+	maxConnections := defaultMaxConns
+	if configLoaded && config["max.connections"] != "" {
+		maxConnections = config["max.connections"]
+	}
+
+	timeoutSeconds := defaultTimeout
+	if configLoaded && config["timeout.seconds"] != "" {
+		timeoutSeconds = config["timeout.seconds"]
+	}
+
+	retryAttempts := defaultRetryCount
+	if configLoaded && config["retry.attempts"] != "" {
+		retryAttempts = config["retry.attempts"]
+	}
+
+	fmt.Printf("Starting Storage Service with configuration:\n")
+	fmt.Printf("- Data Path: %s\n", dataPath)
+	fmt.Printf("- Max Connections: %s\n", maxConnections)
+	fmt.Printf("- Timeout Seconds: %s\n", timeoutSeconds)
+	fmt.Printf("- Retry Attempts: %s\n", retryAttempts)
 
 	port := os.Getenv("PORT")
 	if port == "" {
