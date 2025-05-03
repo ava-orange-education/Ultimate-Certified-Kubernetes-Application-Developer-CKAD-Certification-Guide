@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: storage-service-config
+  namespace: default
+data:
+  storage-config.properties: |
+    data.path=/data
+    max.connections=50
+    timeout.seconds=30
+    retry.attempts=3

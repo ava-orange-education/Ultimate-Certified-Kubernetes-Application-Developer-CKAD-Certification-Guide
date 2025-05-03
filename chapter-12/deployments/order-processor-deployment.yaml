@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-processor-deployment
+  labels:
+    app: order-processor
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: order-processor
+  template:
+    metadata:
+      labels:
+        app: order-processor
+    spec:
+      containers:
+      - name: order-processor
+        image: order-processor:v1
+        ports:
+        - containerPort: 8082
+        env:
+        - name: PORT
+          value: "8082"
+        - name: STORAGE_SERVICE_URL
+          value: "http://storage-service:8083"
+        - name: ORDER_DATA_DIR
+          value: "/orders"
+        startupProbe:
+          httpGet:
+            path: /health/startup
+            port: 8082
+          failureThreshold: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+        volumeMounts:
+        - name: orders-volume
+          mountPath: /orders
+        # Mount ConfigMap as volume
+        - name: config-volume
+          mountPath: /etc/config
+        # Mount Secret as volume
+        - name: secret-volume
+          mountPath: /etc/secrets
+          readOnly: true
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "200m"
+            memory: "256Mi"
+      volumes:
+      - name: orders-volume
+        emptyDir: {}
+      # ConfigMap volume
+      - name: config-volume
+        configMap:
+          name: order-processor-config
+      # Secret volume
+      - name: secret-volume
+        secret:
+          secretName: order-processor-credentials
+          items:
+          - key: username
+            path: db/username
+          - key: password
+            path: db/password
