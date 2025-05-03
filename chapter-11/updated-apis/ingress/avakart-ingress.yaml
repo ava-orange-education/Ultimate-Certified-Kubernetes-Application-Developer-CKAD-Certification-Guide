@@ -1,0 +1,32 @@
+apiVersion: networking.k8s.io/v1  # Current version
+kind: Ingress
+metadata:
+  name: avakart-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: avakart.example.com
+    http:
+      paths:
+      - path: /books
+        pathType: Prefix  # New required field
+        backend:
+          service:  # Changed structure
+            name: books-service
+            port:
+              number: 80
+      - path: /orders
+        pathType: Prefix
+        backend:
+          service:
+            name: order-processor
+            port:
+              number: 80
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend
+            port:
+              number: 80
