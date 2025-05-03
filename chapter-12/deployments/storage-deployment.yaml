@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: storage-deployment
+  labels:
+    app: storage-service
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: storage-service
+  template:
+    metadata:
+      labels:
+        app: storage-service
+    spec:
+      containers:
+      - name: storage-service
+        image: storage-service:v1
+        ports:
+        - containerPort: 8083
+        env:
+        - name: PORT
+          value: "8083"
+        # Using all Secret values as environment variables
+        envFrom:
+        - secretRef:
+            name: storage-db-credentials
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: 8083
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+          successThreshold: 2
+        volumeMounts:
+        - name: data-volume
+          mountPath: /data
+        - name: cache-volume
+          mountPath: /app/cache
+        - name: log-volume
+          mountPath: /app/logs
+        # Mount ConfigMap as volume
+        - name: config-volume
+          mountPath: /etc/config
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "200m"
+            memory: "256Mi"
+      volumes:
+      - name: data-volume
+        emptyDir: {}
+      - name: cache-volume
+        emptyDir: {}
+      - name: log-volume
+        emptyDir: {}
+      # ConfigMap volume
+      - name: config-volume
+        configMap:
+          name: storage-service-config

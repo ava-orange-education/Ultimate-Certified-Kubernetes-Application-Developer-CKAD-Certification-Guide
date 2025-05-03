@@ -17,7 +17,18 @@ const (
 	defaultPort       = "8082"
 	defaultStorageURL = "http://localhost:8083"
 	defaultOrdersDir  = "/orders"
+	configDir         = "/etc/config"  // ConfigMap volume mount path
+	secretsDir        = "/etc/secrets" // Secret volume mount path
 )
+
+// checkFileExists checks if a file exists and logs its presence
+func checkFileExists(path string) bool {
+	if _, err := os.Stat(path); err == nil {
+		log.Printf("Found file: %s", path)
+		return true
+	}
+	return false
+}
 
 func setupOrdersDir() error {
 	dir := os.Getenv("ORDER_DATA_DIR")
@@ -45,6 +56,25 @@ func main() {
 
 	if err := setupOrdersDir(); err != nil {
 		log.Printf("Warning: Could not set up orders directory: %v", err)
+	}
+
+	// Check for ConfigMap and Secret volumes
+	if _, err := os.Stat(configDir); err == nil {
+		log.Printf("ConfigMap volume mounted at %s", configDir)
+		// Check for specific config files
+		checkFileExists(configDir + "/database.properties")
+		checkFileExists(configDir + "/cache.properties")
+	} else {
+		log.Printf("ConfigMap volume not found at %s", configDir)
+	}
+
+	if _, err := os.Stat(secretsDir); err == nil {
+		log.Printf("Secret volume mounted at %s", secretsDir)
+		// Check for specific secret files
+		checkFileExists(secretsDir + "/db/username")
+		checkFileExists(secretsDir + "/db/password")
+	} else {
+		log.Printf("Secret volume not found at %s", secretsDir)
 	}
 
 	ops := opSvc.NewOrderProcessingService(storageURL)
