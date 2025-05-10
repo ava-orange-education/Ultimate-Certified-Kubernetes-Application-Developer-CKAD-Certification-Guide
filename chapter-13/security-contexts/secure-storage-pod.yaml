@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: secure-storage-pod
+spec:
+  containers:
+  - name: storage-service
+    image: storage-service:v1
+    ports:
+    - containerPort: 8083
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        add: ["NET_BIND_SERVICE"]
+        drop: ["ALL"]
+      privileged: false
+      readOnlyRootFilesystem: true
+      runAsNonRoot: true
+      runAsUser: 1000

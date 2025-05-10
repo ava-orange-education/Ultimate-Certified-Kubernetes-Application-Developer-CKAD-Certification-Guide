@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: secure-books-pod
+spec:
+  securityContext:
+    fsGroup: 2000
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 3000
+    supplementalGroups: [1000, 2000]
+  containers:
+  - name: books-service
+    image: books-service:v1
+    ports:
+    - containerPort: 8081
