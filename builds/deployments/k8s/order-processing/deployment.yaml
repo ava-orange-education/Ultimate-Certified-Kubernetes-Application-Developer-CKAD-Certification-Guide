@@ -16,6 +16,10 @@ spec:
         app: order-processor
         app.kubernetes.io/part-of: avakart
     spec:
+      serviceAccountName: order-processor-service-account
+      securityContext:
+        fsGroup: 2000
+        runAsNonRoot: true
       containers:
       - name: order-processor
         image: order-processor:latest
@@ -63,6 +67,9 @@ spec:
           runAsNonRoot: true
           runAsUser: 1000
           allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop: ["ALL"]
       - name: storage-ambassador
         image: nginx:alpine
         ports:
@@ -77,6 +84,14 @@ spec:
           limits:
             cpu: "100m"
             memory: "128Mi"
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 101  # nginx user in Alpine
+          allowPrivilegeEscalation: false
+          capabilities:
+            add: ["NET_BIND_SERVICE"]
+            drop: ["ALL"]
+          readOnlyRootFilesystem: true
       - name: log-collector
         image: log-collector:v1
         volumeMounts:
@@ -93,6 +108,12 @@ spec:
         args:
         - |
           tail -f /var/log/app/*.log | jq '.' || true
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: ["ALL"]
       volumes:
       - name: shared-logs
         emptyDir: {}

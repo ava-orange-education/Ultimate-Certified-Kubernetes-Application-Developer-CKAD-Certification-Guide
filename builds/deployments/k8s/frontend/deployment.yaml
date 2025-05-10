@@ -16,9 +16,21 @@ spec:
         app: frontend
         app.kubernetes.io/part-of: avakart
     spec:
+      serviceAccountName: frontend-service-account
+      securityContext:
+        fsGroup: 2000
+        runAsNonRoot: true
       containers:
       - name: frontend
         image: frontend:latest
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 101  # nginx user
+          allowPrivilegeEscalation: false
+          capabilities:
+            add: ["NET_BIND_SERVICE"]
+            drop: ["ALL"]
+          readOnlyRootFilesystem: true
         env:
         - name: VITE_API_BASE_URL
           value: "http://books-service:8081"  # Default to internal k8s service name
@@ -66,6 +78,15 @@ spec:
         args:
         - |
           tail -f /var/log/app/*.log | jq '.' || true
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: ["ALL"]
       volumes:
       - name: frontend-logs
+        emptyDir: {}
+      # Add a volume for temporary files needed by nginx
+      - name: tmp-volume
         emptyDir: {}

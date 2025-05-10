@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: secure-storage-deployment
+  labels:
+    app: storage-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: storage-service
+  template:
+    metadata:
+      labels:
+        app: storage-service
+    spec:
+      serviceAccountName: storage-service-account
+      containers:
+      - name: storage-service
+        image: storage-service:v1
+        ports:
+        - containerPort: 8083
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            add: ["NET_BIND_SERVICE"]
+            drop: ["ALL"]
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1000
+        volumeMounts:
+        - name: tmp-volume
+          mountPath: /tmp
+        - name: data-volume
+          mountPath: /data
+      volumes:
+      - name: tmp-volume
+        emptyDir: {}
+      - name: data-volume
+        persistentVolumeClaim:
+          claimName: storage-data-pvc

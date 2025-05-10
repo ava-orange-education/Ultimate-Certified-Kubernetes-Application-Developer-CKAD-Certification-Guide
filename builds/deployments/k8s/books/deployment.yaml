@@ -16,10 +16,20 @@ spec:
         app: books-service
         app.kubernetes.io/part-of: avakart
     spec:
+      serviceAccountName: books-service-account
+      securityContext:
+        fsGroup: 2000
+        runAsNonRoot: true
       initContainers:
       - name: service-check
         image: busybox:latest
         command: ['sh', '-c', 'until wget -q -O- http://storage-service:8083/health; do echo waiting for storage service; sleep 2; done;']
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          runAsUser: 1000
+          capabilities:
+            drop: ["ALL"]
       containers:
       - name: books-service
         image: books-service:latest
@@ -92,6 +102,9 @@ spec:
           runAsNonRoot: true
           runAsUser: 1000
           allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop: ["ALL"]
       - name: log-collector
         image: log-collector:v1
         volumeMounts:
@@ -108,6 +121,12 @@ spec:
         args:
         - |
           tail -f /var/log/app/*.log | jq '.' || true
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: ["ALL"]
       volumes:
       - name: shared-logs
         emptyDir: {}

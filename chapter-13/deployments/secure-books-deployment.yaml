@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: secure-books-deployment
+  labels:
+    app: books-service
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: books-service
+  template:
+    metadata:
+      labels:
+        app: books-service
+    spec:
+      serviceAccountName: books-service-account
+      securityContext:
+        fsGroup: 2000
+        runAsNonRoot: true
+      containers:
+      - name: books-service
+        image: books-service:v1
+        ports:
+        - containerPort: 8081
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: ["ALL"]
+          readOnlyRootFilesystem: true
+          runAsUser: 1000
+        volumeMounts:
+        - name: tmp-volume
+          mountPath: /tmp
+        - name: config-volume
+          mountPath: /etc/config
+          readOnly: true
+      volumes:
+      - name: tmp-volume
+        emptyDir: {}
+      - name: config-volume
+        configMap:
+          name: books-service-config
