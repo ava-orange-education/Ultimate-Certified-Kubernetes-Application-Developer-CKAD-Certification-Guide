@@ -1,0 +1,51 @@
+# Guaranteed QoS (requests = limits)
+apiVersion: v1
+kind: Pod
+metadata:
+  name: guaranteed-pod
+  labels:
+    qos-class: guaranteed
+spec:
+  containers:
+  - name: guaranteed-container
+    image: nginx
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "500m"
+      limits:
+        memory: "256Mi"
+        cpu: "500m"
+
+---
+# Burstable QoS (requests < limits)
+apiVersion: v1
+kind: Pod
+metadata:
+  name: burstable-pod
+  labels:
+    qos-class: burstable
+spec:
+  containers:
+  - name: burstable-container
+    image: nginx
+    resources:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "256Mi"
+        cpu: "500m"
+
+---
+# BestEffort QoS (no requests or limits)
+apiVersion: v1
+kind: Pod
+metadata:
+  name: besteffort-pod
+  labels:
+    qos-class: besteffort
+spec:
+  containers:
+  - name: besteffort-container
+    image: nginx
