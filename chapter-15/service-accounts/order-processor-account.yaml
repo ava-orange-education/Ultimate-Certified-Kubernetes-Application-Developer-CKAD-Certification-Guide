@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: order-processor-account
+  namespace: avakart
+  labels:
+    app: order-processor
+    component: backend
+  annotations:
+    description: "Service account for the Order Processor service in AvaKart"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: order-processor-token
+  namespace: avakart
+  annotations:
+    kubernetes.io/service-account.name: order-processor-account
+type: kubernetes.io/service-account-token

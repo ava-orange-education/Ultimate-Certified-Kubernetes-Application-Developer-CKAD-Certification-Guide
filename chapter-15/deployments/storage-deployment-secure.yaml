@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: storage-deployment
+  namespace: avakart
+  labels:
+    app: storage-service
+    component: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: storage-service
+  template:
+    metadata:
+      labels:
+        app: storage-service
+    spec:
+      serviceAccountName: storage-service-account
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: storage-service
+        image: storage-service:v1
+        ports:
+        - containerPort: 8083
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          runAsUser: 1000
+          runAsGroup: 3000
+          readOnlyRootFilesystem: true
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "300m"
+          limits:
+            memory: "1Gi"
+            cpu: "700m"
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8083
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8083
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/config
+          readOnly: true
+        - name: creds-volume
+          mountPath: /etc/creds
+          readOnly: true
+        - name: tmp-volume
+          mountPath: /tmp
+        - name: data-volume
+          mountPath: /data
+      volumes:
+      - name: config-volume
+        configMap:
+          name: storage-service-config
+      - name: creds-volume
+        secret:
+          secretName: storage-db-credentials
+      - name: tmp-volume
+        emptyDir: {}
+      - name: data-volume
+        persistentVolumeClaim:
+          claimName: storage-data-pvc

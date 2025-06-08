@@ -1,0 +1,36 @@
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: require-resource-limits
+  labels:
+    component: admission-control
+    type: validation-policy
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+    - apiGroups: [""]
+      apiVersions: ["v1"]
+      operations: ["CREATE", "UPDATE"]
+      resources: ["pods"]
+  validations:
+  - expression: "has(object.spec.containers[0].resources.limits)"
+    message: "Resource limits are required for all containers"
+  - expression: "has(object.spec.containers[0].resources.limits.cpu)"
+    message: "CPU limits are required for all containers"
+  - expression: "has(object.spec.containers[0].resources.limits.memory)"
+    message: "Memory limits are required for all containers"
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: require-resource-limits-binding
+  labels:
+    component: admission-control
+    type: validation-policy-binding
+spec:
+  policyName: require-resource-limits
+  matchResources:
+    namespaceSelector:
+      matchLabels:
+        environment: production

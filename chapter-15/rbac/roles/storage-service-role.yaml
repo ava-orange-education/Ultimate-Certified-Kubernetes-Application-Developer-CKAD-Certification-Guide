@@ -1,0 +1,25 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: storage-service-role
+  namespace: avakart
+  labels:
+    app: storage-service
+    component: rbac
+rules:
+- apiGroups: [""]
+  resources: ["configmaps", "secrets"]
+  verbs: ["get", "list"]
+  resourceNames: ["storage-service-config", "storage-db-credentials"]
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list", "watch"]
+  resourceNames: []
+- apiGroups: [""]
+  resources: ["persistentvolumeclaims"]
+  verbs: ["get", "list", "watch"]
+  resourceNames: ["storage-data-pvc"]
+- apiGroups: [""]
+  resources: ["services"]
+  verbs: ["get", "list"]
+  resourceNames: ["storage-service"]
