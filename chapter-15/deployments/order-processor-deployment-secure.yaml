@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-processor-deployment
+  namespace: avakart
+  labels:
+    app: order-processor
+    component: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: order-processor
+  template:
+    metadata:
+      labels:
+        app: order-processor
+    spec:
+      serviceAccountName: order-processor-account
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: order-processor
+        image: order-processor:v1
+        ports:
+        - containerPort: 8082
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          runAsUser: 1000
+          runAsGroup: 3000
+          readOnlyRootFilesystem: true
+        resources:
+          requests:
+            memory: "384Mi"
+            cpu: "250m"
+          limits:
+            memory: "768Mi"
+            cpu: "600m"
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8082
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8082
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/config
+          readOnly: true
+        - name: creds-volume
+          mountPath: /etc/creds
+          readOnly: true
+        - name: tmp-volume
+          mountPath: /tmp
+        - name: order-data
+          mountPath: /data
+      volumes:
+      - name: config-volume
+        configMap:
+          name: order-processor-config
+      - name: creds-volume
+        secret:
+          secretName: order-processor-credentials
+      - name: tmp-volume
+        emptyDir: {}
+      - name: order-data
+        persistentVolumeClaim:
+          claimName: order-data-pvc

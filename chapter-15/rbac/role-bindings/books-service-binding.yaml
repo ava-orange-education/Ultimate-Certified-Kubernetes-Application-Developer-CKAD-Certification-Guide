@@ -1,0 +1,16 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: books-service-binding
+  namespace: avakart
+  labels:
+    app: books-service
+    component: rbac
+subjects:
+- kind: ServiceAccount
+  name: books-service-account
+  namespace: avakart
+roleRef:
+  kind: Role
+  name: books-service-role
+  apiGroup: rbac.authorization.k8s.io

@@ -1,0 +1,16 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: storage-service-binding
+  namespace: avakart
+  labels:
+    app: storage-service
+    component: rbac
+subjects:
+- kind: ServiceAccount
+  name: storage-service-account
+  namespace: avakart
+roleRef:
+  kind: Role
+  name: storage-service-role
+  apiGroup: rbac.authorization.k8s.io

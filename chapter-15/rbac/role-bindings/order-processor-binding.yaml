@@ -1,0 +1,16 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: order-processor-binding
+  namespace: avakart
+  labels:
+    app: order-processor
+    component: rbac
+subjects:
+- kind: ServiceAccount
+  name: order-processor-account
+  namespace: avakart
+roleRef:
+  kind: Role
+  name: order-processor-role
+  apiGroup: rbac.authorization.k8s.io

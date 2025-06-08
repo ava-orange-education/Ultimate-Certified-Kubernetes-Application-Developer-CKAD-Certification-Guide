@@ -1,0 +1,21 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: books-service-role
+  namespace: avakart
+  labels:
+    app: books-service
+    component: rbac
+rules:
+- apiGroups: [""]
+  resources: ["configmaps", "secrets"]
+  verbs: ["get", "list"]
+  resourceNames: ["books-config", "books-db-credentials"]
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list", "watch"]
+  resourceNames: []
+- apiGroups: [""]
+  resources: ["services"]
+  verbs: ["get", "list"]
+  resourceNames: ["books-service", "storage-service"]
