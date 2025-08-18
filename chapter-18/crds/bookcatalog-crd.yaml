@@ -1,0 +1,121 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: bookcatalogs.avakart.io
+  labels:
+    app.kubernetes.io/name: avakart
+    app.kubernetes.io/component: crd
+    app.kubernetes.io/part-of: avakart-platform
+spec:
+  group: avakart.io
+  versions:
+  - name: v1
+    served: true
+    storage: true
+    additionalPrinterColumns:
+    - name: Title
+      type: string
+      description: Book title
+      jsonPath: .spec.title
+    - name: Author
+      type: string
+      description: Book author
+      jsonPath: .spec.author
+    - name: Price
+      type: number
+      description: Book price
+      jsonPath: .spec.price
+    - name: Category
+      type: string
+      description: Book category
+      jsonPath: .spec.category
+    - name: Status
+      type: string
+      description: Availability status
+      jsonPath: .status.phase
+    - name: Age
+      type: date
+      jsonPath: .metadata.creationTimestamp
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              title:
+                type: string
+                minLength: 1
+                maxLength: 100
+                description: "Title of the book"
+              author:
+                type: string
+                minLength: 1
+                maxLength: 50
+                description: "Author of the book"
+              isbn:
+                type: string
+                pattern: '^[0-9]{3}-[0-9]{10}$'
+                description: "ISBN in format XXX-XXXXXXXXXX"
+              price:
+                type: number
+                minimum: 0
+                maximum: 1000
+                description: "Price in USD"
+              category:
+                type: string
+                enum: ["fiction", "non-fiction", "technical", "children"]
+                description: "Book category"
+              availability:
+                type: integer
+                minimum: 0
+                default: 0
+                description: "Number of copies available"
+              metadata:
+                type: object
+                properties:
+                  publisher:
+                    type: string
+                    description: "Publisher name"
+                  publishDate:
+                    type: string
+                    format: date
+                    description: "Publication date"
+                  description:
+                    type: string
+                    maxLength: 500
+                    description: "Book description"
+            required:
+            - title
+            - author
+            - isbn
+            - price
+            - category
+          status:
+            type: object
+            properties:
+              phase:
+                type: string
+                enum: ["pending", "available", "out-of-stock", "discontinued"]
+                description: "Current availability phase"
+              lastUpdated:
+                type: string
+                format: date-time
+                description: "Last update timestamp"
+              totalSales:
+                type: integer
+                minimum: 0
+                description: "Total number of copies sold"
+  scope: Namespaced
+  names:
+    plural: bookcatalogs
+    singular: bookcatalog
+    kind: BookCatalog
+    shortNames:
+    - bc
+    - book
+  subresources:
+    status: {}
+    scale:
+      specReplicasPath: .spec.availability
+      statusReplicasPath: .status.totalSales

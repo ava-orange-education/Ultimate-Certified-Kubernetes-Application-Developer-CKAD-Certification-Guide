@@ -1,0 +1,111 @@
+# Valid BookCatalog examples for AvaKart application
+---
+apiVersion: avakart.io/v1
+kind: BookCatalog
+metadata:
+  name: kubernetes-guide
+  namespace: avakart
+  labels:
+    category: technical
+    featured: "true"
+    app.kubernetes.io/name: avakart
+    app.kubernetes.io/component: book-catalog
+spec:
+  title: "Ultimate CKAD Certification Guide"
+  author: "Kubernetes Expert"
+  isbn: "978-1234567890"
+  price: 49.99
+  category: "technical"
+  availability: 100
+  metadata:
+    publisher: "Tech Publications"
+    publishDate: "2024-01-15"
+    description: "Comprehensive guide for CKAD certification with hands-on examples"
+---
+apiVersion: avakart.io/v1
+kind: BookCatalog
+metadata:
+  name: cloud-native-patterns
+  namespace: avakart
+  labels:
+    category: technical
+    featured: "false"
+    app.kubernetes.io/name: avakart
+    app.kubernetes.io/component: book-catalog
+spec:
+  title: "Cloud Native Design Patterns"
+  author: "Architecture Guru"
+  isbn: "978-0987654321"
+  price: 39.99
+  category: "technical"
+  availability: 75
+  metadata:
+    publisher: "Cloud Press"
+    publishDate: "2024-03-20"
+    description: "Essential patterns for building cloud-native applications"
+---
+apiVersion: avakart.io/v1
+kind: BookCatalog
+metadata:
+  name: fiction-bestseller
+  namespace: avakart
+  labels:
+    category: fiction
+    featured: "true"
+    app.kubernetes.io/name: avakart
+    app.kubernetes.io/component: book-catalog
+spec:
+  title: "The DevOps Chronicles"
+  author: "Story Teller"
+  isbn: "978-1122334455"
+  price: 24.99
+  category: "fiction"
+  availability: 50
+  metadata:
+    publisher: "Fiction House"
+    publishDate: "2024-02-10"
+    description: "A thrilling tale of infrastructure automation"
+---
+apiVersion: avakart.io/v1
+kind: BookCatalog
+metadata:
+  name: children-adventure
+  namespace: avakart
+  labels:
+    category: children
+    featured: "false"
+    app.kubernetes.io/name: avakart
+    app.kubernetes.io/component: book-catalog
+spec:
+  title: "Kubernetes for Kids"
+  author: "Learning Expert"
+  isbn: "978-5566778899"
+  price: 19.99
+  category: "children"
+  availability: 25
+  metadata:
+    publisher: "Kids Tech"
+    publishDate: "2024-04-01"
+    description: "Fun introduction to container orchestration for young minds"
+---
+apiVersion: avakart.io/v1
+kind: BookCatalog
+metadata:
+  name: non-fiction-guide
+  namespace: avakart
+  labels:
+    category: non-fiction
+    featured: "true"
+    app.kubernetes.io/name: avakart
+    app.kubernetes.io/component: book-catalog
+spec:
+  title: "The History of Computing"
+  author: "Tech Historian"
+  isbn: "978-9988776655"
+  price: 34.99
+  category: "non-fiction"
+  availability: 60
+  metadata:
+    publisher: "History Press"
+    publishDate: "2024-02-28"
+    description: "Comprehensive history of computing from mainframes to cloud"

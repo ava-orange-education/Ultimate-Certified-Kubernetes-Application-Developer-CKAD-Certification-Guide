@@ -1,0 +1,209 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: avakartconfigs.avakart.io
+  labels:
+    app.kubernetes.io/name: avakart
+    app.kubernetes.io/component: crd
+    app.kubernetes.io/part-of: avakart-platform
+spec:
+  group: avakart.io
+  versions:
+  - name: v1
+    served: true
+    storage: true
+    additionalPrinterColumns:
+    - name: Frontend-Replicas
+      type: integer
+      description: Frontend replica count
+      jsonPath: .spec.frontend.replicas
+    - name: Backend-Services
+      type: integer
+      description: Number of backend services
+      jsonPath: .spec.backend.serviceCount
+    - name: Database-Type
+      type: string
+      description: Database type
+      jsonPath: .spec.database.type
+    - name: Status
+      type: string
+      description: Configuration status
+      jsonPath: .status.phase
+    - name: Age
+      type: date
+      jsonPath: .metadata.creationTimestamp
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              frontend:
+                type: object
+                properties:
+                  replicas:
+                    type: integer
+                    minimum: 1
+                    maximum: 10
+                    default: 2
+                    description: "Number of frontend replicas"
+                  image:
+                    type: string
+                    description: "Frontend container image"
+                  resources:
+                    type: object
+                    properties:
+                      requests:
+                        type: object
+                        properties:
+                          cpu:
+                            type: string
+                            pattern: '^[0-9]+m?$'
+                          memory:
+                            type: string
+                            pattern: '^[0-9]+[KMGT]i?$'
+                      limits:
+                        type: object
+                        properties:
+                          cpu:
+                            type: string
+                            pattern: '^[0-9]+m?$'
+                          memory:
+                            type: string
+                            pattern: '^[0-9]+[KMGT]i?$'
+                required:
+                - replicas
+                - image
+              backend:
+                type: object
+                properties:
+                  serviceCount:
+                    type: integer
+                    minimum: 1
+                    maximum: 5
+                    default: 3
+                    description: "Number of backend services"
+                  booksService:
+                    type: object
+                    properties:
+                      replicas:
+                        type: integer
+                        minimum: 1
+                        maximum: 5
+                        default: 2
+                      image:
+                        type: string
+                      enabled:
+                        type: boolean
+                        default: true
+                    required:
+                    - replicas
+                    - image
+                  storageService:
+                    type: object
+                    properties:
+                      replicas:
+                        type: integer
+                        minimum: 1
+                        maximum: 3
+                        default: 1
+                      image:
+                        type: string
+                      enabled:
+                        type: boolean
+                        default: true
+                    required:
+                    - replicas
+                    - image
+                  orderProcessor:
+                    type: object
+                    properties:
+                      replicas:
+                        type: integer
+                        minimum: 1
+                        maximum: 5
+                        default: 2
+                      image:
+                        type: string
+                      enabled:
+                        type: boolean
+                        default: true
+                    required:
+                    - replicas
+                    - image
+                required:
+                - serviceCount
+                - booksService
+                - storageService
+                - orderProcessor
+              database:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    enum: ["postgres", "mysql", "mongodb"]
+                    default: "postgres"
+                    description: "Database type"
+                  version:
+                    type: string
+                    description: "Database version"
+                  storage:
+                    type: string
+                    pattern: '^[0-9]+[KMGT]i$'
+                    default: "10Gi"
+                    description: "Storage size"
+                  replicas:
+                    type: integer
+                    minimum: 1
+                    maximum: 3
+                    default: 1
+                    description: "Database replicas"
+                required:
+                - type
+                - version
+                - storage
+            required:
+            - frontend
+            - backend
+            - database
+          status:
+            type: object
+            properties:
+              phase:
+                type: string
+                enum: ["pending", "configuring", "ready", "error"]
+                description: "Configuration phase"
+              conditions:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                    status:
+                      type: string
+                      enum: ["True", "False", "Unknown"]
+                    reason:
+                      type: string
+                    message:
+                      type: string
+                    lastTransitionTime:
+                      type: string
+                      format: date-time
+              observedGeneration:
+                type: integer
+                description: "Last observed generation"
+              readyServices:
+                type: integer
+                description: "Number of ready services"
+  scope: Namespaced
+  names:
+    plural: avakartconfigs
+    singular: avakartconfig
+    kind: AvaKartConfig
+    shortNames:
+    - akc
+    - config
+  subresources:
+    status: {}

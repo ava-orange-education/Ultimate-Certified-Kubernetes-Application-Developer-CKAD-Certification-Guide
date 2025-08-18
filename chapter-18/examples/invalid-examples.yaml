@@ -1,0 +1,224 @@
+# Invalid Custom Resource examples for validation testing
+# These examples demonstrate common validation errors that students might encounter
+
+---
+# Invalid BookCatalog - Empty title (violates minLength: 1)
+apiVersion: avakart.io/v1
+kind: BookCatalog
+metadata:
+  name: invalid-empty-title
+  namespace: avakart
+spec:
+  title: ""  # This will fail - minLength: 1
+  author: "Valid Author"
+  isbn: "978-1234567890"
+  price: 29.99
+  category: "technical"
+  availability: 10
+
+---
+# Invalid BookCatalog - Invalid ISBN pattern
+apiVersion: avakart.io/v1
+kind: BookCatalog
+metadata:
+  name: invalid-isbn-pattern
+  namespace: avakart
+spec:
+  title: "Valid Title"
+  author: "Valid Author"
+  isbn: "invalid-isbn"  # This will fail - doesn't match pattern '^[0-9]{3}-[0-9]{10}$'
+  price: 29.99
+  category: "technical"
+  availability: 10
+
+---
+# Invalid BookCatalog - Negative price
+apiVersion: avakart.io/v1
+kind: BookCatalog
+metadata:
+  name: invalid-negative-price
+  namespace: avakart
+spec:
+  title: "Valid Title"
+  author: "Valid Author"
+  isbn: "978-1234567890"
+  price: -10  # This will fail - minimum: 0
+  category: "technical"
+  availability: 10
+
+---
+# Invalid BookCatalog - Invalid category enum
+apiVersion: avakart.io/v1
+kind: BookCatalog
+metadata:
+  name: invalid-category-enum
+  namespace: avakart
+spec:
+  title: "Valid Title"
+  author: "Valid Author"
+  isbn: "978-1234567890"
+  price: 29.99
+  category: "invalid-category"  # This will fail - not in enum ["fiction", "non-fiction", "technical", "children"]
+  availability: 10
+
+---
+# Invalid BookCatalog - Missing required field
+apiVersion: avakart.io/v1
+kind: BookCatalog
+metadata:
+  name: invalid-missing-required
+  namespace: avakart
+spec:
+  title: "Valid Title"
+  author: "Valid Author"
+  # isbn is missing - This will fail as it's required
+  price: 29.99
+  category: "technical"
+  availability: 10
+
+---
+# Invalid Order - Invalid zip code pattern
+apiVersion: avakart.io/v1
+kind: Order
+metadata:
+  name: invalid-zipcode
+  namespace: avakart
+spec:
+  customerId: "customer-12345"
+  itemCount: 1
+  items:
+  - bookId: "kubernetes-guide"
+    quantity: 1
+    price: 49.99
+  shippingAddress:
+    street: "123 Tech Street"
+    city: "San Francisco"
+    state: "CA"
+    zipCode: "invalid-zip"  # This will fail - doesn't match pattern '^[0-9]{5}(-[0-9]{4})?$'
+    country: "US"
+  paymentMethod: "credit-card"
+
+---
+# Invalid Order - Invalid payment method enum
+apiVersion: avakart.io/v1
+kind: Order
+metadata:
+  name: invalid-payment-method
+  namespace: avakart
+spec:
+  customerId: "customer-12345"
+  itemCount: 1
+  items:
+  - bookId: "kubernetes-guide"
+    quantity: 1
+    price: 49.99
+  shippingAddress:
+    street: "123 Tech Street"
+    city: "San Francisco"
+    state: "CA"
+    zipCode: "94105"
+    country: "US"
+  paymentMethod: "bitcoin"  # This will fail - not in enum ["credit-card", "debit-card", "paypal", "bank-transfer"]
+
+---
+# Invalid Order - Zero quantity (violates minimum: 1)
+apiVersion: avakart.io/v1
+kind: Order
+metadata:
+  name: invalid-zero-quantity
+  namespace: avakart
+spec:
+  customerId: "customer-12345"
+  itemCount: 1
+  items:
+  - bookId: "kubernetes-guide"
+    quantity: 0  # This will fail - minimum: 1
+    price: 49.99
+  shippingAddress:
+    street: "123 Tech Street"
+    city: "San Francisco"
+    state: "CA"
+    zipCode: "94105"
+    country: "US"
+  paymentMethod: "credit-card"
+
+---
+# Invalid AvaKartConfig - Frontend replicas exceeds maximum
+apiVersion: avakart.io/v1
+kind: AvaKartConfig
+metadata:
+  name: invalid-frontend-replicas
+  namespace: avakart
+spec:
+  frontend:
+    replicas: 15  # This will fail - maximum: 10
+    image: "avakart/frontend:v1.2.0"
+  backend:
+    serviceCount: 3
+    booksService:
+      replicas: 2
+      image: "avakart/books-service:v1.1.0"
+    storageService:
+      replicas: 1
+      image: "avakart/storage-service:v1.0.5"
+    orderProcessor:
+      replicas: 2
+      image: "avakart/order-processor:v1.1.2"
+  database:
+    type: "postgres"
+    version: "13"
+    storage: "10Gi"
+
+---
+# Invalid AvaKartConfig - Invalid database type enum
+apiVersion: avakart.io/v1
+kind: AvaKartConfig
+metadata:
+  name: invalid-database-type
+  namespace: avakart
+spec:
+  frontend:
+    replicas: 3
+    image: "avakart/frontend:v1.2.0"
+  backend:
+    serviceCount: 3
+    booksService:
+      replicas: 2
+      image: "avakart/books-service:v1.1.0"
+    storageService:
+      replicas: 1
+      image: "avakart/storage-service:v1.0.5"
+    orderProcessor:
+      replicas: 2
+      image: "avakart/order-processor:v1.1.2"
+  database:
+    type: "oracle"  # This will fail - not in enum ["postgres", "mysql", "mongodb"]
+    version: "13"
+    storage: "10Gi"
+
+---
+# Invalid AvaKartConfig - Invalid storage pattern
+apiVersion: avakart.io/v1
+kind: AvaKartConfig
+metadata:
+  name: invalid-storage-pattern
+  namespace: avakart
+spec:
+  frontend:
+    replicas: 3
+    image: "avakart/frontend:v1.2.0"
+  backend:
+    serviceCount: 3
+    booksService:
+      replicas: 2
+      image: "avakart/books-service:v1.1.0"
+    storageService:
+      replicas: 1
+      image: "avakart/storage-service:v1.0.5"
+    orderProcessor:
+      replicas: 2
+      image: "avakart/order-processor:v1.1.2"
+  database:
+    type: "postgres"
+    version: "13"
+    storage: "10GB"  # This will fail - doesn't match pattern '^[0-9]+[KMGT]i$'
