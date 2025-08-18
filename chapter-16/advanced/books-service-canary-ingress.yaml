@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: books-service-canary
+  namespace: avakart
+  labels:
+    app: books-service
+    component: ingress
+    deployment: canary
+  annotations:
+    nginx.ingress.kubernetes.io/canary: "true"
+    nginx.ingress.kubernetes.io/canary-weight: "10"
+    nginx.ingress.kubernetes.io/canary-by-header: "X-Canary"
+    nginx.ingress.kubernetes.io/canary-by-header-value: "always"
+    nginx.ingress.kubernetes.io/canary-by-cookie: "canary"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: api.avakart.example.com
+    http:
+      paths:
+      - path: /books
+        pathType: Prefix
+        backend:
+          service:
+            name: books-service-canary
+            port:
+              number: 80

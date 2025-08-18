@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-processor-service
+  namespace: avakart
+  labels:
+    app: order-processor
+    component: backend
+    tier: processing
+spec:
+  type: ClusterIP
+  selector:
+    app: order-processor
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8083
+    protocol: TCP
