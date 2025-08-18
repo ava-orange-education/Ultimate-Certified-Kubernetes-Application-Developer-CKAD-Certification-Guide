@@ -1,0 +1,57 @@
+# Books Service Egress Network Policy
+# Allows books service to communicate with storage service and database
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: books-service-egress-policy
+  namespace: avakart
+  labels:
+    app: books-service
+    policy-type: egress
+    tier: backend
+spec:
+  podSelector:
+    matchLabels:
+      app: books-service
+  policyTypes:
+  - Egress
+  egress:
+  # Allow communication to storage service
+  - to:
+    - podSelector:
+        matchLabels:
+          app: storage-service
+    ports:
+    - protocol: TCP
+      port: 8082
+  # Allow communication to database in database namespace
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: database
+    - podSelector:
+        matchLabels:
+          app: postgres
+    ports:
+    - protocol: TCP
+      port: 5432
+  # Allow DNS resolution
+  - to: []
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+  # Allow HTTPS traffic for external book APIs
+  - to:
+    - ipBlock:
+        cidr: 0.0.0.0/0
+        except:
+        - 10.0.0.0/8
+        - 192.168.0.0/16
+        - 172.16.0.0/12
+    ports:
+    - protocol: TCP
+      port: 443
+    - protocol: TCP
+      port: 80

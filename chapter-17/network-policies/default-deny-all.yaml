@@ -1,0 +1,16 @@
+# Default Deny All Traffic Policy
+# This policy denies all ingress and egress traffic to all pods in the namespace
+# This creates a secure baseline where only explicitly allowed traffic is permitted
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: avakart
+  labels:
+    policy-type: default-deny
+    security-level: high
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress

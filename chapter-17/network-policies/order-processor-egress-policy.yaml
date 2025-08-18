@@ -1,0 +1,67 @@
+# Order Processor Egress Network Policy
+# Allows order processor to communicate with other services and external APIs
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: order-processor-egress-policy
+  namespace: avakart
+  labels:
+    app: order-processor
+    policy-type: egress
+    tier: backend
+spec:
+  podSelector:
+    matchLabels:
+      app: order-processor
+  policyTypes:
+  - Egress
+  egress:
+  # Allow communication to books service
+  - to:
+    - podSelector:
+        matchLabels:
+          app: books-service
+    ports:
+    - protocol: TCP
+      port: 8081
+  # Allow communication to storage service
+  - to:
+    - podSelector:
+        matchLabels:
+          app: storage-service
+    ports:
+    - protocol: TCP
+      port: 8082
+  # Allow DNS resolution
+  - to: []
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+  # Allow HTTPS traffic for external payment and notification APIs
+  - to:
+    - ipBlock:
+        cidr: 0.0.0.0/0
+        except:
+        - 10.0.0.0/8
+        - 192.168.0.0/16
+        - 172.16.0.0/12
+    ports:
+    - protocol: TCP
+      port: 443
+    - protocol: TCP
+      port: 80
+  # Allow communication to message queue (if using external service)
+  - to:
+    - ipBlock:
+        cidr: 0.0.0.0/0
+        except:
+        - 10.0.0.0/8
+        - 192.168.0.0/16
+        - 172.16.0.0/12
+    ports:
+    - protocol: TCP
+      port: 5672  # RabbitMQ
+    - protocol: TCP
+      port: 9092  # Kafka

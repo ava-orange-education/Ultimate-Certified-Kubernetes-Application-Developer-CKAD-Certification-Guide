@@ -1,0 +1,357 @@
+# Complete AvaKart Application Network Policy Set
+# This file contains all network policies for the AvaKart application
+# Apply this for comprehensive network security implementation
+
+# Frontend Network Policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: avakart-frontend-complete-policy
+  namespace: avakart
+  labels:
+    app: frontend
+    policy-type: complete
+    tier: frontend
+spec:
+  podSelector:
+    matchLabels:
+      app: frontend
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Allow traffic from ingress controllers
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: ingress-nginx
+    ports:
+    - protocol: TCP
+      port: 3000
+  # Allow traffic from internal networks
+  - from:
+    - ipBlock:
+        cidr: 10.0.0.0/8
+    ports:
+    - protocol: TCP
+      port: 3000
+  # Allow monitoring
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: monitoring
+    ports:
+    - protocol: TCP
+      port: 3000
+  egress:
+  # Allow communication to backend services
+  - to:
+    - podSelector:
+        matchLabels:
+          app: books-service
+    ports:
+    - protocol: TCP
+      port: 8081
+  - to:
+    - podSelector:
+        matchLabels:
+          app: order-processor
+    ports:
+    - protocol: TCP
+      port: 8083
+  # Allow DNS resolution
+  - to: []
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+  # Allow external CDN and API calls
+  - to:
+    - ipBlock:
+        cidr: 0.0.0.0/0
+        except:
+        - 10.0.0.0/8
+        - 192.168.0.0/16
+        - 172.16.0.0/12
+    ports:
+    - protocol: TCP
+      port: 443
+    - protocol: TCP
+      port: 80
+---
+# Books Service Network Policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: avakart-books-complete-policy
+  namespace: avakart
+  labels:
+    app: books-service
+    policy-type: complete
+    tier: backend
+spec:
+  podSelector:
+    matchLabels:
+      app: books-service
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Allow traffic from frontend
+  - from:
+    - podSelector:
+        matchLabels:
+          app: frontend
+    ports:
+    - protocol: TCP
+      port: 8081
+  # Allow traffic from order processor
+  - from:
+    - podSelector:
+        matchLabels:
+          app: order-processor
+    ports:
+    - protocol: TCP
+      port: 8081
+  # Allow monitoring
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: monitoring
+    ports:
+    - protocol: TCP
+      port: 8081
+  # Allow health checks
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+    ports:
+    - protocol: TCP
+      port: 8081
+  egress:
+  # Allow communication to storage service
+  - to:
+    - podSelector:
+        matchLabels:
+          app: storage-service
+    ports:
+    - protocol: TCP
+      port: 8082
+  # Allow communication to database
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: database
+    - podSelector:
+        matchLabels:
+          app: postgres
+    ports:
+    - protocol: TCP
+      port: 5432
+  # Allow DNS resolution
+  - to: []
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+  # Allow external book APIs
+  - to:
+    - ipBlock:
+        cidr: 0.0.0.0/0
+        except:
+        - 10.0.0.0/8
+        - 192.168.0.0/16
+        - 172.16.0.0/12
+    ports:
+    - protocol: TCP
+      port: 443
+    - protocol: TCP
+      port: 80
+---
+# Order Processor Network Policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: avakart-order-processor-complete-policy
+  namespace: avakart
+  labels:
+    app: order-processor
+    policy-type: complete
+    tier: backend
+spec:
+  podSelector:
+    matchLabels:
+      app: order-processor
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Allow traffic from frontend
+  - from:
+    - podSelector:
+        matchLabels:
+          app: frontend
+    ports:
+    - protocol: TCP
+      port: 8083
+  # Allow monitoring
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: monitoring
+    ports:
+    - protocol: TCP
+      port: 8083
+  # Allow health checks
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+    ports:
+    - protocol: TCP
+      port: 8083
+  egress:
+  # Allow communication to books service
+  - to:
+    - podSelector:
+        matchLabels:
+          app: books-service
+    ports:
+    - protocol: TCP
+      port: 8081
+  # Allow communication to storage service
+  - to:
+    - podSelector:
+        matchLabels:
+          app: storage-service
+    ports:
+    - protocol: TCP
+      port: 8082
+  # Allow DNS resolution
+  - to: []
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+  # Allow external payment and notification APIs
+  - to:
+    - ipBlock:
+        cidr: 0.0.0.0/0
+        except:
+        - 10.0.0.0/8
+        - 192.168.0.0/16
+        - 172.16.0.0/12
+    ports:
+    - protocol: TCP
+      port: 443
+    - protocol: TCP
+      port: 80
+  # Allow message queue communication
+  - to:
+    - ipBlock:
+        cidr: 0.0.0.0/0
+        except:
+        - 10.0.0.0/8
+        - 192.168.0.0/16
+        - 172.16.0.0/12
+    ports:
+    - protocol: TCP
+      port: 5672  # RabbitMQ
+    - protocol: TCP
+      port: 9092  # Kafka
+---
+# Storage Service Network Policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: avakart-storage-complete-policy
+  namespace: avakart
+  labels:
+    app: storage-service
+    policy-type: complete
+    tier: backend
+spec:
+  podSelector:
+    matchLabels:
+      app: storage-service
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Allow traffic from books service
+  - from:
+    - podSelector:
+        matchLabels:
+          app: books-service
+    ports:
+    - protocol: TCP
+      port: 8082
+  # Allow traffic from order processor
+  - from:
+    - podSelector:
+        matchLabels:
+          app: order-processor
+    ports:
+    - protocol: TCP
+      port: 8082
+  # Allow monitoring
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: monitoring
+    ports:
+    - protocol: TCP
+      port: 8082
+  # Allow health checks
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+    ports:
+    - protocol: TCP
+      port: 8082
+  egress:
+  # Allow communication to database
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: database
+    - podSelector:
+        matchLabels:
+          app: postgres
+    ports:
+    - protocol: TCP
+      port: 5432
+  # Allow communication to Redis cache
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: database
+    - podSelector:
+        matchLabels:
+          app: redis
+    ports:
+    - protocol: TCP
+      port: 6379
+  # Allow DNS resolution
+  - to: []
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+  # Allow backup to external storage
+  - to:
+    - ipBlock:
+        cidr: 0.0.0.0/0
+        except:
+        - 10.0.0.0/8
+        - 192.168.0.0/16
+        - 172.16.0.0/12
+    ports:
+    - protocol: TCP
+      port: 443

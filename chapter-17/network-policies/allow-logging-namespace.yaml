@@ -1,0 +1,50 @@
+# Allow Logging Namespace Policy
+# Allows logging services to collect logs from avakart pods
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-logging-namespace
+  namespace: avakart
+  labels:
+    policy-type: namespace-based
+    purpose: logging
+spec:
+  podSelector:
+    matchLabels:
+      logging: "enabled"
+  policyTypes:
+  - Egress
+  egress:
+  # Allow communication to logging namespace
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: logging
+    - podSelector:
+        matchLabels:
+          app: fluentd
+    ports:
+    - protocol: TCP
+      port: 24224
+  # Allow communication to elasticsearch in logging namespace
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: logging
+    - podSelector:
+        matchLabels:
+          app: elasticsearch
+    ports:
+    - protocol: TCP
+      port: 9200
+  # Allow communication to logstash
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: logging
+    - podSelector:
+        matchLabels:
+          app: logstash
+    ports:
+    - protocol: TCP
+      port: 5044
