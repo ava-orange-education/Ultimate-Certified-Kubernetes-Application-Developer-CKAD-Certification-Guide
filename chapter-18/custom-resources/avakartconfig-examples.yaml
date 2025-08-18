@@ -1,0 +1,232 @@
+# AvaKartConfig examples for different environments
+---
+# Production AvaKartConfig
+apiVersion: avakart.io/v1
+kind: AvaKartConfig
+metadata:
+  name: production-config
+  namespace: avakart
+  labels:
+    environment: production
+    version: v1.2.0
+    app.kubernetes.io/name: avakart
+    app.kubernetes.io/component: application-config
+spec:
+  frontend:
+    replicas: 3
+    image: "avakart/frontend:v1.2.0"
+    resources:
+      requests:
+        cpu: "100m"
+        memory: "128Mi"
+      limits:
+        cpu: "500m"
+        memory: "512Mi"
+  backend:
+    serviceCount: 3
+    booksService:
+      replicas: 3
+      image: "avakart/books-service:v1.1.0"
+      enabled: true
+    storageService:
+      replicas: 2
+      image: "avakart/storage-service:v1.0.5"
+      enabled: true
+    orderProcessor:
+      replicas: 3
+      image: "avakart/order-processor:v1.1.2"
+      enabled: true
+  database:
+    type: "postgres"
+    version: "13"
+    storage: "50Gi"
+    replicas: 2
+---
+# Development AvaKartConfig
+apiVersion: avakart.io/v1
+kind: AvaKartConfig
+metadata:
+  name: development-config
+  namespace: avakart-dev
+  labels:
+    environment: development
+    version: latest
+    app.kubernetes.io/name: avakart
+    app.kubernetes.io/component: application-config
+spec:
+  frontend:
+    replicas: 1
+    image: "avakart/frontend:latest"
+    resources:
+      requests:
+        cpu: "50m"
+        memory: "64Mi"
+      limits:
+        cpu: "200m"
+        memory: "256Mi"
+  backend:
+    serviceCount: 3
+    booksService:
+      replicas: 1
+      image: "avakart/books-service:latest"
+      enabled: true
+    storageService:
+      replicas: 1
+      image: "avakart/storage-service:latest"
+      enabled: true
+    orderProcessor:
+      replicas: 1
+      image: "avakart/order-processor:latest"
+      enabled: true
+  database:
+    type: "postgres"
+    version: "13"
+    storage: "5Gi"
+    replicas: 1
+---
+# Staging AvaKartConfig
+apiVersion: avakart.io/v1
+kind: AvaKartConfig
+metadata:
+  name: staging-config
+  namespace: avakart-staging
+  labels:
+    environment: staging
+    version: v1.2.0-rc1
+    app.kubernetes.io/name: avakart
+    app.kubernetes.io/component: application-config
+spec:
+  frontend:
+    replicas: 2
+    image: "avakart/frontend:v1.2.0-rc1"
+    resources:
+      requests:
+        cpu: "75m"
+        memory: "96Mi"
+      limits:
+        cpu: "300m"
+        memory: "384Mi"
+  backend:
+    serviceCount: 3
+    booksService:
+      replicas: 2
+      image: "avakart/books-service:v1.1.0-rc1"
+      enabled: true
+    storageService:
+      replicas: 1
+      image: "avakart/storage-service:v1.0.5-rc1"
+      enabled: true
+    orderProcessor:
+      replicas: 2
+      image: "avakart/order-processor:v1.1.2-rc1"
+      enabled: true
+  database:
+    type: "postgres"
+    version: "13"
+    storage: "20Gi"
+    replicas: 1
+---
+# High-availability AvaKartConfig
+apiVersion: avakart.io/v1
+kind: AvaKartConfig
+metadata:
+  name: ha-config
+  namespace: avakart-ha
+  labels:
+    environment: production
+    version: v1.2.0
+    deployment-type: high-availability
+    app.kubernetes.io/name: avakart
+    app.kubernetes.io/component: application-config
+spec:
+  frontend:
+    replicas: 5
+    image: "avakart/frontend:v1.2.0"
+    resources:
+      requests:
+        cpu: "200m"
+        memory: "256Mi"
+      limits:
+        cpu: "1000m"
+        memory: "1Gi"
+  backend:
+    serviceCount: 3
+    booksService:
+      replicas: 5
+      image: "avakart/books-service:v1.1.0"
+      enabled: true
+    storageService:
+      replicas: 3
+      image: "avakart/storage-service:v1.0.5"
+      enabled: true
+    orderProcessor:
+      replicas: 5
+      image: "avakart/order-processor:v1.1.2"
+      enabled: true
+  database:
+    type: "postgres"
+    version: "13"
+    storage: "100Gi"
+    replicas: 3
+---
+# Configuration with status example (showing how status might be updated by an operator)
+apiVersion: avakart.io/v1
+kind: AvaKartConfig
+metadata:
+  name: config-with-status
+  namespace: avakart
+  labels:
+    environment: production
+    version: v1.2.0
+    app.kubernetes.io/name: avakart
+    app.kubernetes.io/component: application-config
+spec:
+  frontend:
+    replicas: 3
+    image: "avakart/frontend:v1.2.0"
+    resources:
+      requests:
+        cpu: "100m"
+        memory: "128Mi"
+      limits:
+        cpu: "500m"
+        memory: "512Mi"
+  backend:
+    serviceCount: 3
+    booksService:
+      replicas: 3
+      image: "avakart/books-service:v1.1.0"
+      enabled: true
+    storageService:
+      replicas: 2
+      image: "avakart/storage-service:v1.0.5"
+      enabled: true
+    orderProcessor:
+      replicas: 3
+      image: "avakart/order-processor:v1.1.2"
+      enabled: true
+  database:
+    type: "postgres"
+    version: "13"
+    storage: "50Gi"
+    replicas: 2
+status:
+  phase: "ready"
+  observedGeneration: 1
+  readyServices: 3
+  conditions:
+  - type: "FrontendReady"
+    status: "True"
+    reason: "DeploymentReady"
+    message: "Frontend deployment is ready with 3/3 replicas"
+    lastTransitionTime: "2024-01-15T10:30:00Z"
+  - type: "BackendReady"
+    status: "True"
+    reason: "AllServicesReady"
+    message: "All backend services are ready and healthy"
+    lastTransitionTime: "2024-01-15T10:35:00Z"
+  - type: "DatabaseReady"
+    status: "True"
+    reason: "DatabaseConnected"
+    message: "Database cluster is ready and accepting connections"
+    lastTransitionTime: "2024-01-15T10:25:00Z"
