@@ -1,0 +1,48 @@
+# Frontend Ingress Network Policy
+# Allows external access to the frontend service from ingress controllers and specific IP ranges
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: frontend-ingress-policy
+  namespace: avakart
+  labels:
+    app: frontend
+    policy-type: ingress
+    tier: frontend
+spec:
+  podSelector:
+    matchLabels:
+      app: frontend
+  policyTypes:
+  - Ingress
+  ingress:
+  # Allow traffic from ingress controllers
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: ingress-nginx
+    ports:
+    - protocol: TCP
+      port: 3000
+  # Allow traffic from internal network ranges
+  - from:
+    - ipBlock:
+        cidr: 10.0.0.0/8
+    ports:
+    - protocol: TCP
+      port: 3000
+  # Allow traffic from cluster internal ranges
+  - from:
+    - ipBlock:
+        cidr: 172.16.0.0/12
+    ports:
+    - protocol: TCP
+      port: 3000
+  # Allow health checks from kube-system
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+    ports:
+    - protocol: TCP
+      port: 3000

@@ -1,0 +1,54 @@
+# Frontend Egress Network Policy
+# Allows frontend to communicate with backend services and external resources
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: frontend-egress-policy
+  namespace: avakart
+  labels:
+    app: frontend
+    policy-type: egress
+    tier: frontend
+spec:
+  podSelector:
+    matchLabels:
+      app: frontend
+  policyTypes:
+  - Egress
+  egress:
+  # Allow communication to books service
+  - to:
+    - podSelector:
+        matchLabels:
+          app: books-service
+    ports:
+    - protocol: TCP
+      port: 8081
+  # Allow communication to order processor
+  - to:
+    - podSelector:
+        matchLabels:
+          app: order-processor
+    ports:
+    - protocol: TCP
+      port: 8083
+  # Allow DNS resolution
+  - to: []
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+  # Allow HTTPS traffic for external APIs and CDNs
+  - to:
+    - ipBlock:
+        cidr: 0.0.0.0/0
+        except:
+        - 10.0.0.0/8
+        - 192.168.0.0/16
+        - 172.16.0.0/12
+    ports:
+    - protocol: TCP
+      port: 443
+    - protocol: TCP
+      port: 80

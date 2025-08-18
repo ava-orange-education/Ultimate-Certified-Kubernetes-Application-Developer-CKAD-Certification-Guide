@@ -1,0 +1,50 @@
+# Books Service Ingress Network Policy
+# Allows access to books service from frontend and order processor only
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: books-service-ingress-policy
+  namespace: avakart
+  labels:
+    app: books-service
+    policy-type: ingress
+    tier: backend
+spec:
+  podSelector:
+    matchLabels:
+      app: books-service
+  policyTypes:
+  - Ingress
+  ingress:
+  # Allow traffic from frontend
+  - from:
+    - podSelector:
+        matchLabels:
+          app: frontend
+    ports:
+    - protocol: TCP
+      port: 8081
+  # Allow traffic from order processor
+  - from:
+    - podSelector:
+        matchLabels:
+          app: order-processor
+    ports:
+    - protocol: TCP
+      port: 8081
+  # Allow health checks from kube-system (for probes)
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+    ports:
+    - protocol: TCP
+      port: 8081
+  # Allow monitoring from monitoring namespace
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: monitoring
+    ports:
+    - protocol: TCP
+      port: 8081

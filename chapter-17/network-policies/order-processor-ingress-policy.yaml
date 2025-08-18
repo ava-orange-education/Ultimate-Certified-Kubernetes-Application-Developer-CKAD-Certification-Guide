@@ -1,0 +1,42 @@
+# Order Processor Ingress Network Policy
+# Allows access to order processor from frontend only
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: order-processor-ingress-policy
+  namespace: avakart
+  labels:
+    app: order-processor
+    policy-type: ingress
+    tier: backend
+spec:
+  podSelector:
+    matchLabels:
+      app: order-processor
+  policyTypes:
+  - Ingress
+  ingress:
+  # Allow traffic from frontend
+  - from:
+    - podSelector:
+        matchLabels:
+          app: frontend
+    ports:
+    - protocol: TCP
+      port: 8083
+  # Allow health checks from kube-system (for probes)
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+    ports:
+    - protocol: TCP
+      port: 8083
+  # Allow monitoring from monitoring namespace
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: monitoring
+    ports:
+    - protocol: TCP
+      port: 8083

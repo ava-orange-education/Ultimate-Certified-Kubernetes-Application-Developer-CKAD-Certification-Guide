@@ -1,0 +1,43 @@
+# Allow Monitoring Namespace Policy
+# Allows monitoring tools to access all pods in the avakart namespace
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-monitoring-namespace
+  namespace: avakart
+  labels:
+    policy-type: namespace-based
+    purpose: monitoring
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  ingress:
+  # Allow traffic from monitoring namespace
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: monitoring
+    ports:
+    - protocol: TCP
+      port: 9090  # Prometheus metrics
+    - protocol: TCP
+      port: 8080  # Health endpoints
+    - protocol: TCP
+      port: 8081  # Books service
+    - protocol: TCP
+      port: 8082  # Storage service
+    - protocol: TCP
+      port: 8083  # Order processor
+    - protocol: TCP
+      port: 3000  # Frontend
+  # Allow traffic from prometheus-operator namespace
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: prometheus-operator
+    ports:
+    - protocol: TCP
+      port: 9090
+    - protocol: TCP
+      port: 8080

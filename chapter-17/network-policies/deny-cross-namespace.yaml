@@ -1,0 +1,41 @@
+# Deny Cross-Namespace Communication Policy
+# Prevents pods from communicating with pods in other namespaces
+# except for explicitly allowed traffic (DNS, monitoring, etc.)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: deny-cross-namespace
+  namespace: avakart
+  labels:
+    policy-type: namespace-based
+    purpose: isolation
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Only allow traffic from pods in the same namespace
+  - from:
+    - podSelector: {}
+  # Allow traffic from kube-system for health checks
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+  egress:
+  # Only allow traffic to pods in the same namespace
+  - to:
+    - podSelector: {}
+  # Allow DNS resolution (typically in kube-system)
+  - to: []
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+  # Allow traffic to kube-system for health checks
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system

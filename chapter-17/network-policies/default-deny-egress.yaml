@@ -1,0 +1,15 @@
+# Default Deny Egress Policy
+# This policy denies all outgoing traffic from all pods in the namespace
+# Use this when you want to allow ingress but deny all egress by default
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-egress
+  namespace: avakart
+  labels:
+    policy-type: default-deny
+    traffic-direction: egress
+spec:
+  podSelector: {}
+  policyTypes:
+  - Egress

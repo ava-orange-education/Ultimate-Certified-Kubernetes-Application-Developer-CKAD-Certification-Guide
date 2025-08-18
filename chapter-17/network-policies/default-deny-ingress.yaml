@@ -1,0 +1,15 @@
+# Default Deny Ingress Policy
+# This policy denies all incoming traffic to all pods in the namespace
+# Use this when you want to allow egress but deny all ingress by default
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+  namespace: avakart
+  labels:
+    policy-type: default-deny
+    traffic-direction: ingress
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
